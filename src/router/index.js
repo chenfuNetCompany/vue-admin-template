@@ -78,6 +78,56 @@ export const constantRoutes = [
   },
 
   {
+    path: '/user',
+    component: Layout,
+    redirect: '/user/table',
+    name: '用户管理',
+    meta: { title: '用户管理', icon: 'el-icon-s-help' },
+    children: [
+      {
+        path: 'table',
+        name: '用户列表',
+        component: () => import('@/views/customer/index'),
+        meta: { title: '用户列表', icon: 'table' }
+      },
+      {
+        path: 'asset',
+        name: '用户资产',
+        component: () => import('@/views/customer/asset'),
+        meta: { title: '用户资产', icon: 'table' }
+      }
+    ]
+  },
+
+  {
+    path: '/promotion',
+    component: Layout,
+    redirect: '/promotion/table',
+    name: '营销管理',
+    meta: { title: '营销管理', icon: 'el-icon-s-help' },
+    children: [
+      {
+        path: 'add',
+        name: '创建优惠券',
+        component: () => import('@/views/promotion/add'),
+        meta: { title: '创建优惠券', icon: 'form' }
+      },
+      {
+        path: 'table',
+        name: '优惠券列表',
+        component: () => import('@/views/promotion/index'),
+        meta: { title: '优惠券列表', icon: 'table' }
+      },
+      {
+        path: 'receive',
+        name: '优惠券持有列表',
+        component: () => import('@/views/promotion/receive'),
+        meta: { title: '优惠券持有列表', icon: 'table' }
+      }
+    ]
+  },
+
+  {
     path: '/example',
     component: Layout,
     redirect: '/example/table',
