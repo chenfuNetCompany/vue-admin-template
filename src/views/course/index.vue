@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { getCourseList } from '@/api/course'
+import { addCourse, getCourseList, getCourseCate } from '@/api/course'
 
 export default {
   filters: {
