@@ -160,6 +160,7 @@ export default {
         specList: [],
         skuDTOList: [],
         hasSku : true,
+        cateId : 1
       },
       uploadFiles:[],
       skuAttribute:[],
@@ -174,7 +175,7 @@ export default {
 
     fetchData() {
       this.listLoading = true
-      getCourseCate().then(response => {
+      getCourseCate({cateId:1}).then(response => {
         this.skuAttribute = response.data.skuAttributeList
       }).finally(
         this.listLoading = false

@@ -3,7 +3,7 @@ import request from '@/utils/request'
 
 export function addCourse(data) {
   return request({
-    url: '/course/add',
+    url: '/good/add',
     method: 'post',
     data
   })
@@ -11,15 +11,16 @@ export function addCourse(data) {
 
 export function getCourseList(params) {
   return request({
-    url: '/course/list',
+    url: '/good/list',
     method: 'get',
     params
   })
 }
 
-export function getCourseCate() {
+export function getCourseCate(params) {
   return request({
-    url: '/course/category',
-    method: 'get'
+    url: '/good/category',
+    method: 'get',
+    params
   })
 }

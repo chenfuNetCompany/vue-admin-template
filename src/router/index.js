@@ -78,6 +78,28 @@ export const constantRoutes = [
   },
 
   {
+    path: '/trade',
+    component: Layout,
+    redirect: '/trade/orders',
+    name: '交易管理',
+    meta: { title: '交易管理', icon: 'el-icon-s-help' },
+    children: [
+      {
+        path: 'orders',
+        name: '订单列表',
+        component: () => import('@/views/trade/orders'),
+        meta: { title: '订单列表', icon: 'table' }
+      },
+      {
+        path: 'refunds',
+        name: '退款列表',
+        component: () => import('@/views/trade/refunds'),
+        meta: { title: '退款列表', icon: 'table' }
+      }
+    ]
+  },
+
+  {
     path: '/user',
     component: Layout,
     redirect: '/user/table',

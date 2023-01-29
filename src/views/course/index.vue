@@ -71,7 +71,8 @@ export default {
     return {
       params:{
         page:1,
-        pageSize:10
+        pageSize:10,
+        cateId:1
       },
       list: null,
       listLoading: true,
