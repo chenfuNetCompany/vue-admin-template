@@ -78,6 +78,28 @@ export const constantRoutes = [
   },
 
   {
+    path: '/activity',
+    component: Layout,
+    redirect: '/activity/table',
+    name: '活动管理',
+    meta: { title: '活动管理', icon: 'el-icon-s-help' },
+    children: [
+      {
+        path: 'table',
+        name: '活动列表',
+        component: () => import('@/views/activity/index'),
+        meta: { title: '活动列表', icon: 'table' }
+      },
+      {
+        path: 'add',
+        name: '添加活动',
+        component: () => import('@/views/activity/add'),
+        meta: { title: '添加活动', icon: 'form' }
+      }
+    ]
+  },
+
+  {
     path: '/trade',
     component: Layout,
     redirect: '/trade/orders',
