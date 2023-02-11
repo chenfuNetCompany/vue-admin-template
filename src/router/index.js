@@ -217,6 +217,28 @@ export const constantRoutes = [
   },
 
   {
+    path: '/banner',
+    component: Layout,
+    redirect: '/banner/table',
+    name: 'Banner管理',
+    meta: { title: 'Banner管理', icon: 'el-icon-s-help' },
+    children: [
+      {
+        path: 'table',
+        name: 'Banner列表',
+        component: () => import('@/views/banner/index'),
+        meta: { title: 'Banner列表', icon: 'table' }
+      },
+      {
+        path: 'add',
+        name: '添加Banner',
+        component: () => import('@/views/banner/add'),
+        meta: { title: '添加Banner', icon: 'form' }
+      }
+    ]
+  },
+
+  {
     path: '/example',
     component: Layout,
     redirect: '/example/table',

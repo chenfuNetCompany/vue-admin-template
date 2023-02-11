@@ -14,19 +14,16 @@
         </template> -->
       </el-table-column>
       
-      <el-table-column width="80" label="新闻主图" style="align:center">
+      <el-table-column width="120" label="主图" style="align:center">
           <template slot-scope="scope">
-              <img :src="scope.row.mainImage" width="60" height="60"/>
+              <img :src="scope.row.image" width="120" height="60"/>
           </template>
       </el-table-column>
 
-      <el-table-column label="标题" width="300" prop="title"></el-table-column>
-      <el-table-column label="正文" width="300" prop="detail"></el-table-column>
-      <el-table-column width="80" label="正文图" style="align:center">
-          <template slot-scope="scope">
-              <img :src="scope.row.detailImage" width="60" height="60"/>
-          </template>
-      </el-table-column>
+      <el-table-column label="位置" width="100" prop="pos"></el-table-column>
+      <el-table-column label="跳转模块" width="100" prop="actionInfo"></el-table-column>
+      <el-table-column label="跳转参数" width="100" prop="actionInfo"></el-table-column>
+      <el-table-column label="状态" width="100" prop="status"></el-table-column>
       <el-table-column label="操作" width="130px">
         <template slot-scope="scope">
           <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyid(scope.row.id)" >编辑</el-button>
@@ -47,7 +44,7 @@
 </template>
 
 <script>
-import { addNews, getNewsList } from '@/api/news'
+import { addBanner, getBannerList } from '@/api/banner'
 
 export default {
   filters: {
@@ -65,11 +62,9 @@ export default {
       params:{
         page:1,
         pageSize:10,
-        cateId:1
       },
       list: null,
       listLoading: true,
-      total:0
     }
   },
   created() {
@@ -78,7 +73,7 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true
-      getNewsList(this.params).then(response => {
+      getBannerList(this.params).then(response => {
         this.list = response.data.listData
         this.total = response.data.totalCount
         this.listLoading = false

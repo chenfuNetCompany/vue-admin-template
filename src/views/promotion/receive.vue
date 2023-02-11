@@ -1,5 +1,23 @@
 <template>
     <div class="app-container">
+      <el-form ref="form" :model="form" text-align="left" label-position="left" :inline="true" >
+        <el-form-item label="状态">
+          <el-select v-model="params.status" placeholder="请选择">
+            <el-option
+              v-for="item in statuOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="用户手机">
+          <el-input v-model="params.status">确定</el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="fetchData">确定</el-button>
+        </el-form-item>
+      </el-form>
       <el-table
         v-loading="listLoading"
         :data="list"
@@ -46,6 +64,11 @@
           page:1,
           pageSize:10
         },
+        statuOptions:[
+          {value:1,label:'未使用'},
+          {value:2,label:'已使用'},
+          {value:3,label:'已过期'}
+        ],
         list: null,
         listLoading: true,
         total:0
@@ -79,7 +102,7 @@
 
       statusFilter(status) {
         const statusMap = {
-          1: '可使用',
+          1: '未使用',
           2: '已使用',
           3: '已过期',
         }

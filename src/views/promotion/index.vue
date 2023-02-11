@@ -74,7 +74,7 @@
           couponId:null,
           userId:null,
           count:null
-        }
+        },
       }
     },
     created() {
