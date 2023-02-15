@@ -13,9 +13,9 @@
         <el-table-column width="120" label="退款状态" prop="statusText"></el-table-column>
         <el-table-column label="操作" width="130px">
           <template slot-scope="scope">
-            <el-button v-show = 'scope.row.status === 0' type="text" icon="el-icon-edit" size="mini" @click="arrpovalbyid(scope.row.id)" >通过</el-button>
-            <el-button v-show = 'scope.row.status === 0' type="text" icon="el-icon-edit" size="mini" @click="refusebyid(scope.row.id)" >拒绝</el-button>
-            <el-button v-show = 'scope.row.status === 1' type="text" icon="el-icon-edit" size="mini" @click="dorefundbyid(scope.row.id)" >退款</el-button>
+            <el-button v-show = 'scope.row.status === 1' type="text" icon="el-icon-edit" size="mini" @click="arrpovalbyid(scope.row.id)" >通过</el-button>
+            <el-button v-show = 'scope.row.status === 1' type="text" icon="el-icon-edit" size="mini" @click="refusebyid(scope.row.id)" >拒绝</el-button>
+            <el-button v-show = 'scope.row.status === 2' type="text" icon="el-icon-edit" size="mini" @click="dorefundbyid(scope.row.id)" >退款</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -111,12 +111,12 @@
 
       statusFilter(status) {
         const statusMap = {
-          0: '待审核',
-          1: '审核通过',
-          2: '退款成功',
-          3: '退款失败',
-          4: '已拒绝',
-          5: '已取消',
+          1: '待审核',
+          2: '审核通过',
+          3: '退款成功',
+          4: '退款失败',
+          100: '已拒绝',
+          101: '已取消',
         }
         return statusMap[status]
       }

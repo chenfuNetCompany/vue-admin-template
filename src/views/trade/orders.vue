@@ -19,7 +19,7 @@
         <el-table-column width="120" label="原价" prop="oriAmount"></el-table-column>
         <el-table-column width="120" label="订单状态" prop="statusText"></el-table-column>
         <el-table-column width="200" label="下单时间" prop="createTime"></el-table-column>
-        <el-table-column width="120" label="退款状态" prop="refundFlag"></el-table-column>
+        <el-table-column width="120" label="退款状态" prop="refundStatusText"></el-table-column>
         <el-table-column width="200" label="买家账号" prop="userAccount"></el-table-column>
         <el-table-column width="120" label="买家手机" prop="userMobile"></el-table-column>
       </el-table>
@@ -76,6 +76,7 @@
             else if (element.status === 2){
               element.statusText = '已付款'
             }
+            element.refundStatusText = this.refundStatusFilter(element.refundStatus)
           });
         })
       },
@@ -95,7 +96,20 @@
           0: '正常',
         }
         return statusMap[status]
+      },
+
+      refundStatusFilter(status) {
+        const statusMap = {
+          1: '待审核',
+          2: '审核通过',
+          3: '退款成功',
+          4: '退款失败',
+          100: '已拒绝',
+          101: '已取消',
+        }
+        return statusMap[status]
       }
+
     }
   }
   </script>
