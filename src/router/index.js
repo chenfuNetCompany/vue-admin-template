@@ -54,7 +54,29 @@ export const constantRoutes = [
       meta: { title: 'Dashboard', icon: 'dashboard' }
     }]
   },
-  
+
+  {
+    path: '/account',
+    component: Layout,
+    redirect: '/account/table',
+    name: '账号管理',
+    meta: { title: '账号管理', icon: 'el-icon-s-help' },
+    children: [
+      {
+        path: 'table',
+        name: '账号列表',
+        component: () => import('@/views/account/index'),
+        meta: { title: '账号列表', icon: 'table' }
+      },
+      {
+        path: 'add',
+        name: '添加账号',
+        component: () => import('@/views/account/add'),
+        meta: { title: '添加账号', icon: 'form' }
+      }
+    ]
+  },
+
   {
     path: '/course',
     component: Layout,
