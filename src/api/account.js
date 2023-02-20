@@ -3,7 +3,7 @@ import request from '@/utils/request'
 
 export function addAccount(data) {
   return request({
-    url: '/account/creat',
+    url: '/account/create',
     method: 'post',
     data
   })
