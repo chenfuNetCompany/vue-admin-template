@@ -44,7 +44,7 @@
 		        <el-button @click="dialogOrderVisible = false">取 消</el-button>
 		        <el-button type="primary" @click="distCoupon()">确 定</el-button>
 		    </div>
-		</el-dialog>
+		  </el-dialog>
     </div>
   </template>
   

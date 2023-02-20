@@ -78,6 +78,22 @@ export const constantRoutes = [
   },
 
   {
+    path: '/base',
+    component: Layout,
+    // redirect: '/course/table',
+    name: '基础管理',
+    meta: { title: '基础管理', icon: 'el-icon-s-help' },
+    children: [
+      {
+        path: 'coach',
+        name: '教练管理',
+        component: () => import('@/views/coach/index'),
+        meta: { title: '教练管理', icon: 'table' }
+      },
+    ]
+  },
+
+  {
     path: '/course',
     component: Layout,
     redirect: '/course/table',
