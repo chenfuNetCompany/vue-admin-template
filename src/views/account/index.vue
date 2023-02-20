@@ -14,7 +14,6 @@
         </template> -->
       </el-table-column>
       <el-table-column label="账户名称" width="200" prop="account"></el-table-column>
-      <el-table-column label="电话号码" width="200" prop="mobile"></el-table-column>
       <el-table-column label="角色名称" width="95" prop="roleName"></el-table-column>
       <el-table-column class-name="status-col" label="账号状态" width="110" align="center">
         <template slot-scope="scope">
@@ -41,7 +40,7 @@
 </template>
 
 <script>
-import { addAccount, getAccountList, getRoleList } from '@/api/account'
+import {getAccountList, getRoleList } from '@/api/account'
 
 export default {
   filters: {
