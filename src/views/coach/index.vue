@@ -46,25 +46,11 @@
               <el-input placeholder="请输入教练名字" style="width:280px;" v-model="form.name" clearable/>
           </el-form-item>
           <el-form-item label="头像(支持jpg/jpeg/png文件，且不超过250kb)">
-            <div style="display: flex;height: 130px;width: 100px;">
-              <div class="goodpic">
-                <div style="display:flex;width:100px;height:100px;overflow:hidden;">
-                    <img :src="form.avatarUrl" style="width:98px;height:100px;"/>
-                </div>
-                <el-button size="small" type="text" @click="deleteImage()" style="width:100px;height:30px;text-align: center;">删除</el-button>
-              </div>
-              <el-upload :on-success="handleSuccess"
-                action=""
-                accept=".jpg,.jpeg,.png"
-                :on-preview="handlePreview"
-                :http-request="uploadOss"
-                :on-remove="handleRemove" 
-                :show-file-list="false"
-                list-type="picture"
-                class="goodpicadd">
-                <el-button size="medium" type="text" icon="el-icon-circle-plus-outline" >添加图片</el-button>
-              </el-upload>
-            </div>
+            <OssUploader 
+              v-bind:file="form.avatar"
+              v-bind:url="form.avatarUrl"
+              @valueChanged="avatorChanged" >
+            </OssUploader>
           </el-form-item>
           <el-form-item label="所属场馆">
             <el-select
@@ -107,12 +93,12 @@
 
 <script>
 import { addCoach, updateCoach, deleteCoach, getCoachList, getCoachAccountList } from '@/api/coach'
-import { addRoom, updateRoom, deleteRoom, getRoomList } from '@/api/room'
-import { getOssPolicy, generateOssUrl } from '@/api/oss'
-import { v4 as uuidv4 } from 'uuid'
-import axios from 'axios'
+import OssUploader from "@/components/OssUploader"
 
 export default {
+  components:{
+    OssUploader
+  },
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -225,71 +211,10 @@ export default {
       }
     },
 
-    async uploadOss(params){
-      let file = params.file;
-      let size = file.size / 1024;
-      if (size >= 250){
-          this.$message.error("图片大小不能超过250kb");
-          return;
-      }
-
-      let key = uuidv4() + "_" + file.name;
-      
-      const res = await getOssPolicy().catch(ex => {
-          return this.$message.error(ex)
-      })
-      console.log(res);
-
-      if (res.success === false){
-          return this.$message.error('获取发布令牌失败:'+ res.errorMsg);
-      }
-
-      //上传图片
-      let ossPolicy = res.data;
-      let sendData = new FormData();
-      sendData.append('OSSAccessKeyId', ossPolicy.accessid);
-      sendData.append('policy', ossPolicy.policy);
-      sendData.append('Signature', ossPolicy.signature);
-      sendData.append('keys', ossPolicy.dir);
-      sendData.append('key',key)
-      sendData.append('success_action_status', 200) // 指定返回的状态码
-      sendData.append('file', file)
-
-      let uploadError = false;
-      await axios.post(ossPolicy.host, sendData).then(() => {
-          console.log('得到上传到阿里云的图片：' + key)
-      }).catch(ex => {
-          console.log(ex);
-          this.$message.error(ex);
-          uploadError = true;
-      });
-
-      if (uploadError){
-          return;
-      }
-
-      //获取预览地址
-      const ossUrlRes = await generateOssUrl(key).catch(ex => {
-          this.$message.error(ex);
-      });
-      console.log(ossUrlRes);
-
-      if (ossUrlRes.success == false){
-          return this.$message.error('获取发布图片地址失败:'+ res.errorMsg);
-      }
-
-      
-      this.form.avatar = key;
-      this.form.avatarUrl = ossUrlRes.data.publicUrl;
+    avatorChanged(file, url){
+      this.form.avatar = file;
+      this.form.avatarUrl = url;
     },
-
-    handleSuccess(response){
-    },
-    //移除图片
-    handleRemove(file){
-    },
-    handlePreview(file){
-    }
 
   }
 }
