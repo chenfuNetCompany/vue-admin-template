@@ -9,6 +9,14 @@ export function addAccount(data) {
   })
 }
 
+export function deleteAccount(data) {
+  return request({
+    url: '/account/delete',
+    method: 'post',
+    data
+  })
+}
+
 export function getAccountList(params) {
   return request({
     url: '/account/list',
