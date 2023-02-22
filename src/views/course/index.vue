@@ -64,6 +64,7 @@
 <script>
 import { addGood, getGoodList, getGoodCate, online, offline, recommend, unrecommend } from '@/api/good'
 import { booleanFilter, goodStatusFilter} from '@/utils/filter'
+import { throwStatement } from '@babel/types';
 
 export default {
   data() {
@@ -71,7 +72,7 @@ export default {
       params:{
         page:1,
         pageSize:10,
-        cateId:1
+        cateId:null
       },
       list: null,
       listLoading: true,
@@ -79,8 +80,20 @@ export default {
     }
   },
   created() {
+    var path = this.$route.path;
+    if (path === "/product/course"){
+      this.params.cateId = 1;
+    }else if (path === "/product/ticket"){
+      this.params.cateId = 2;
+    }else if (path === "/product/activity"){
+      this.params.cateId = 3;
+    }else{
+      this.$message.error('页面路径错误')
+      return;
+    }
     this.fetchData()
   },
+
   methods: {
     fetchData() {
       this.listLoading = true
@@ -148,7 +161,7 @@ export default {
 
 
     gotoadd(){
-      this.$router.push({path:'/product/course/add'})
+      this.$router.push({path:'/product/course/add', query:{cateId:this.params.cateId}})
     },
 
     editbyid(goodid){

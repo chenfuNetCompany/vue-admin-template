@@ -74,7 +74,14 @@
       </div>
     </el-form-item>
 
-    <el-form-item label="价格库存">
+    <el-form-item label="价格" v-show="form.hasSku === false">
+      <el-input v-model="form.price" />
+    </el-form-item>
+    <el-form-item label="库存" v-show="form.hasSku === false">
+      <el-input v-model="form.quantity" />
+    </el-form-item>
+
+    <el-form-item label="价格库存" v-show="form.hasSku === true">
       <el-table
         :show-header="true"
         :data="skuList"
@@ -109,7 +116,6 @@
 import { addGood, updateGood, getGoodCate, getGoodDetail } from '@/api/good'
 import OssUploader from "@/components/OssUploader"
 import {validObj, validString} from "@/utils/validate"
-import { throwStatement } from '@babel/types'
 
 
 export default {
@@ -125,7 +131,7 @@ export default {
         specList: [],
         skuDTOList: [],
         hasSku : true,
-        categoryId : 1,
+        categoryId : null,
         id:null
       },
       uploadFiles:[
@@ -141,12 +147,21 @@ export default {
   
   created() {
     let params = this.$route.query;
-    console.log("params:", params);
-    if (validObj(params) && validObj(params.goodId)){
-      this.form.id = params.goodId;
-      this.isEdit = true;
+    if (validObj(params) ){
+      if (validObj(params.goodId)){
+        this.form.id = params.goodId;
+        this.isEdit = true;
+      }else if (validObj(params.cateId)){
+        this.form.categoryId = params.cateId
+      }else{
+        this.$message.error("路径参数错误")
+        return;
+      }
+    }else{
+      this.$message.error("路径参数缺失")
+      return;
     }
-    console.log("isEdit:", this.isEdit);
+    
     this.initData()
   },
 
@@ -156,48 +171,52 @@ export default {
         this.uploadFiles.push({index:i,file:null,url:null})
       }
 
+      let goodDetail = null;
+      if (this.isEdit){
+        const goodRes = await getGoodDetail({goodId:this.form.id});
+        if (goodRes.success){
+          goodDetail = goodRes.data;
+          this.form.categoryId = goodDetail.categoryId;
+        }else{
+          this.$message.error("产品信息请求失败:" + goodDetail.errorMsg)
+          return;
+        }
+      }
+
       const cateRes = await getGoodCate({cateId:this.form.categoryId}).catch(e => {
         this.$message.error(e)
       });
 
       if (cateRes.success){
         this.skuAttribute = cateRes.data.skuAttributeList
-        this.goodAttribute = cateRes.data.goodAttributeList
+        this.goodAttribute = cateRes.data.goodAttributeList.filter(s => {return s.display})
+        this.form.hasSku = this.skuAttribute.length > 0;
       }else{
         this.$message.error("类目信息请求失败:" + cateRes.errorMsg)
       }
 
       if (this.isEdit){
-        const goodDetail = await getGoodDetail({goodId:this.form.id}).catch(e => {
-          this.$message.error(e)
-        });
-        
-        if (goodDetail.success){
-          this.form.title = goodDetail.data.title;
-          this.form.detail = goodDetail.data.detail;
+        this.form.title = goodDetail.title;
+        this.form.detail = goodDetail.detail;
 
-          for (var i = 0; i < Math.min(goodDetail.data.images.length, this.uploadFiles.length); i++){
-            this.uploadFiles[i]["url"] = goodDetail.data.images[i].url;
-            this.uploadFiles[i]["file"] = goodDetail.data.images[i].file;
-          }
-
-          this.goodAttribute.forEach(o=>{
-            o.value = this.getGoodAttrValueById(goodDetail.data.specs, o.id);
-          })
-
-          this.skuAttribute.forEach(o=>{
-            o.values = this.getSkuAttrValuesById(goodDetail.data.skuAttrs, o.id)
-          })
-
-          this.updateSku();
-          this.skuList.forEach(o=>{
-            this.updateLocalSkuByGoodSku(goodDetail.data.skus, o)
-          })
-          this.skuList = this.skuList.slice(0)
-
-        }else{
-          this.$message.error("产品信息请求失败:" + goodDetail.errorMsg)
+        for (var i = 0; i < Math.min(goodDetail.images.length, this.uploadFiles.length); i++){
+          this.uploadFiles[i]["url"] = goodDetail.images[i].url;
+          this.uploadFiles[i]["file"] = goodDetail.images[i].file;
         }
+
+        this.goodAttribute.forEach(o=>{
+          o.value = this.getGoodAttrValueById(goodDetail.specs, o.id);
+        })
+
+        this.skuAttribute.forEach(o=>{
+          o.values = this.getSkuAttrValuesById(goodDetail.skuAttrs, o.id)
+        })
+
+        this.updateSku();
+        this.skuList.forEach(o=>{
+          this.updateLocalSkuByGoodSku(goodDetail.skus, o)
+        })
+        this.skuList = this.skuList.slice(0)
       }
     },
 
@@ -328,7 +347,13 @@ export default {
 
       if (res.success){
         this.$message.success("发布成功")
-        this.$router.push({path:'/product/course'})
+        if (this.form.categoryId === 1){
+          this.$router.push({path:'/product/course'})
+        }else if (this.form.categoryId === 2){
+          this.$router.push({path:'/product/ticket'})
+        }else if (this.form.categoryId === 3){
+          this.$router.push({path:'/product/activity'})
+        }
       }else{
         this.$message.error("发布失败:"+res.errorMsg)
       }
