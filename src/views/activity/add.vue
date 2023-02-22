@@ -116,7 +116,7 @@
 import { getOssPolicy, generateOssUrl } from '@/api/oss'
 import { v4 as uuidv4 } from 'uuid'
 import axios from 'axios'
-import { addActivity, getActivityList, getActivityCate} from '@/api/activity'
+import { addGood, getGoodList, getGoodCate } from '@/api/good'
 
 export default {
   data() {
@@ -145,19 +145,12 @@ export default {
 
     fetchData() {
       this.listLoading = true
-      getActivityCate({cateId:this.form.categoryId}).then(response => {
+      getGoodCate({cateId:this.form.categoryId}).then(response => {
         this.skuAttribute = response.data.skuAttributeList
       }).finally(
         this.listLoading = false
       )
     },
-
-    // onEidtAttibuteValue(event, value){
-    //   console.log(event)
-    //   console.log(value)
-    //   value.v = event
-    //   this.skuAttribute = this.skuAttribute.slice(0)
-    // },
 
     onAddAttribute(item){
       if (item.values === null || item.values === undefined){
@@ -232,7 +225,7 @@ export default {
       });
       this.form.skuDTOList = this.skuDTOList
 
-      const res = await addActivity(this.form).catch(e =>{
+      const res = await addGood(this.form).catch(e =>{
         return this.$message.error(ex)
       })
     },

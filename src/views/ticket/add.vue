@@ -137,7 +137,7 @@
 import { getOssPolicy, generateOssUrl } from '@/api/oss'
 import { v4 as uuidv4 } from 'uuid'
 import axios from 'axios'
-import { addGood, getGoodList, getGoodCate} from '@/api/good'
+import { addGood, getGoodList, getGoodCate } from '@/api/good'
 import { run } from 'runjs'
 
 export default {

@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { addCourse, getCourseList, getCourseCate } from '@/api/course'
+import { addGood, getGoodList, getGoodCate } from '@/api/good'
 
 export default {
   filters: {
@@ -85,7 +85,7 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true
-      getCourseList(this.params).then(response => {
+      getGoodList(this.params).then(response => {
         this.list = response.data.listData
         this.total = response.data.totalCount
         this.listLoading = false

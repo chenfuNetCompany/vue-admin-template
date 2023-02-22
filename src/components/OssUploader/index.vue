@@ -1,22 +1,23 @@
 <template>
   <div style="display: flex;height: 130px;width: 100px;">
     <div class="goodpic">
-      <div style="display:flex;width:100px;height:100px;overflow:hidden;">
+      <div v-show='url != null' style="display:flex;width:100px;height:100px;overflow:hidden;">
           <img :src="url" style="width:98px;height:100px;"/>
       </div>
-      <el-button size="small" type="text" @click="deleteImage()" style="width:100px;height:30px;text-align: center;">删除</el-button>
+      <el-button v-show='url != null' size="small" type="text" @click="deleteImage()" style="width:100px;height:30px;text-align: center;">删除</el-button>
+      <el-upload :on-success="handleSuccess"
+        action=""
+        accept=".jpg,.jpeg,.png"
+        :on-preview="handlePreview"
+        :http-request="uploadOss"
+        :on-remove="handleRemove" 
+        :show-file-list="false"
+        list-type="picture"
+        class="goodpicadd"
+        v-show='url === null || url === undefined '>
+        <el-button size="medium" type="text" icon="el-icon-circle-plus-outline" >添加图片</el-button>
+      </el-upload>
     </div>
-    <el-upload :on-success="handleSuccess"
-      action=""
-      accept=".jpg,.jpeg,.png"
-      :on-preview="handlePreview"
-      :http-request="uploadOss"
-      :on-remove="handleRemove" 
-      :show-file-list="false"
-      list-type="picture"
-      class="goodpicadd">
-      <el-button size="medium" type="text" icon="el-icon-circle-plus-outline" >添加图片</el-button>
-    </el-upload>
   </div>
 </template>
 
@@ -34,6 +35,10 @@ export default {
     },
     file: {
       type: String,
+    },
+    index:{
+      type:Number,
+      default:0
     }
   },
   computed: {
@@ -96,7 +101,7 @@ export default {
       
       this.file = ossKey;
       this.url = ossUrlRes.data.publicUrl;
-      this.$emit('valueChanged', this.file, this.url)
+      this.emitChange();
     },
 
     handleSuccess(response){
@@ -108,6 +113,17 @@ export default {
     },
 
     deleteImage(){
+      this.file = null;
+      this.url = null;
+      this.emitChange();
+    },
+
+    emitChange(){
+      this.$emit('valueChanged', {
+        index:this.index,
+        file:this.file,
+        url:this.url
+      })
     }
   }
 }

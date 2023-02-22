@@ -9,25 +9,16 @@
         <el-input v-model="form.detail" type="textarea" />
       </el-form-item>
 
-      <el-form-item label="商品主图(必传，支持jpg/jpeg/png文件，且不超过150kb)">
-        <div style="display: flex;height: 130px;width: 100px;">
-          <div v-for="(item, i) in uploadFiles" class="goodpic">
-            <div style="display:flex;width:100px;height:100px;overflow:hidden;">
-              <img :src="item.url" style="width:98px;height:100px;"/>
-            </div>
-            <el-button size="small" type="text" @click="deleteHandle(i)" style="width:100px;height:30px;text-align: center;">删除</el-button>
+      <el-form-item label="商品主图(必传，最多6张，支持jpg/jpeg/png文件，且不超过150kb)">
+        <div style="display: flex; height: 130;">
+          <div v-for="(item,index) in uploadFiles">
+            <OssUploader 
+              :file="item.file"
+              :url="item.url"
+              :index="index"
+              @valueChanged="imageChanged" >
+            </OssUploader>
           </div>
-          <el-upload :on-success="handleSuccess"
-            action=""
-            accept=".jpg,.jpeg,.png"
-            :on-preview="handlePreview"
-            :http-request="uploadOss"
-            :on-remove="handleRemove" 
-            :show-file-list="false"
-            list-type="picture"
-            class="goodpicadd">
-            <el-button size="medium" type="text" icon="el-icon-circle-plus-outline" >添加图片</el-button>
-          </el-upload>
         </div>
     </el-form-item>
 
@@ -68,9 +59,7 @@
           </span>
           <el-table
             :show-header="false"
-            v-loading="listLoading"
             :data="item.values"
-            element-loading-text="Loading"
             fit
             highlight-current-row
             v-show='item.values != null && item.values != undefined && item.values.length > 0'
@@ -88,90 +77,45 @@
     <el-form-item label="价格库存">
       <el-table
         :show-header="true"
-        v-loading="listLoading"
-        :data="skuDTOList"
-        element-loading-text="Loading"
+        :data="skuList"
         fit
         highlight-current-row
-        v-show='skuDTOList.length > 0'
+        v-show='skuList.length > 0'
       >
         <template v-for="(item,index) in skuHeads">
-          <!-- <el-table-column :prop="item.id" :label="item.name" width="200"></el-table-column> -->
           <el-table-column :label="item.name" width="200" :prop="item.key" :key="item.key">
-            <!-- <template slot-scope="scope">
-              {{ scope.row[attribute.id] }}
-            </template> -->
           </el-table-column>
         </template>
-        <template>
-          <el-table-column label="价格" width="200">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row['price']"></el-input>
-            </template>
-          </el-table-column>
-          <el-table-column label="库存" width="200">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row['quantity']"></el-input>
-            </template>
-          </el-table-column>
-        </template>
+        <el-table-column label="价格" width="200">
+          <template slot-scope="scope">
+            <input v-model="scope.row.price"/>
+          </template>
+        </el-table-column>
+        <el-table-column label="库存" width="200">
+          <template slot-scope="scope">
+            <input v-model="scope.row.quantity"/>
+          </template>
+        </el-table-column>
       </el-table>
     </el-form-item>
-
-    
-
-      
-
-
-
-      <!-- <el-form-item label="Activity zone">
-        <el-select v-model="form.region" placeholder="please select your zone">
-          <el-option label="Zone one" value="shanghai" />
-          <el-option label="Zone two" value="beijing" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="Activity time">
-        <el-col :span="11">
-          <el-date-picker v-model="form.date1" type="date" placeholder="Pick a date" style="width: 100%;" />
-        </el-col>
-        <el-col :span="2" class="line">-</el-col>
-        <el-col :span="11">
-          <el-time-picker v-model="form.date2" type="fixed-time" placeholder="Pick a time" style="width: 100%;" />
-        </el-col>
-      </el-form-item>
-      <el-form-item label="Instant delivery">
-        <el-switch v-model="form.delivery" />
-      </el-form-item>
-      <el-form-item label="Activity type">
-        <el-checkbox-group v-model="form.type">
-          <el-checkbox label="Online activities" name="type" />
-          <el-checkbox label="Promotion activities" name="type" />
-          <el-checkbox label="Offline activities" name="type" />
-          <el-checkbox label="Simple brand exposure" name="type" />
-        </el-checkbox-group>
-      </el-form-item>
-      <el-form-item label="Resources">
-        <el-radio-group v-model="form.resource">
-          <el-radio label="Sponsor" />
-          <el-radio label="Venue" />
-        </el-radio-group>
-      </el-form-item> -->
-      <el-form-item>
-        <el-button type="primary" @click="onSubmit">Create</el-button>
-        <!-- <el-button @click="onCancel">Cancel</el-button> -->
-      </el-form-item>
+    <el-form-item>
+      <el-button type="primary" @click="onSubmit">{{isEdit ? "更新":"发布"}}</el-button>
+    </el-form-item>
     </el-form>
   </div>
 </template>
 
 <script>
-import { getOssPolicy, generateOssUrl } from '@/api/oss'
-import { v4 as uuidv4 } from 'uuid'
-import axios from 'axios'
-import { addCourse, getCourseList, getCourseCate} from '@/api/course'
-import { run } from 'runjs'
+import { addGood, updateGood, getGoodCate, getGoodDetail } from '@/api/good'
+import OssUploader from "@/components/OssUploader"
+import {validObj, validString} from "@/utils/validate"
+import { throwStatement } from '@babel/types'
+
 
 export default {
+  components:{
+    OssUploader
+  },
   data() {
     return {
       form: {
@@ -181,43 +125,120 @@ export default {
         specList: [],
         skuDTOList: [],
         hasSku : true,
-        cateId : 1
+        categoryId : 1,
+        id:null
       },
-      uploadFiles:[],
+      uploadFiles:[
+      ],
       skuAttribute:[],
       goodAttribute:[],
-      skuDTOList:[],
-      skuHeads:[]
+      skuList:[],
+      skuHeads:[],
+      maxFile:6,
+      isEdit:false
     }
   },
+  
   created() {
-    this.fetchData()
+    let params = this.$route.query;
+    console.log("params:", params);
+    if (validObj(params) && validObj(params.goodId)){
+      this.form.id = params.goodId;
+      this.isEdit = true;
+    }
+    console.log("isEdit:", this.isEdit);
+    this.initData()
   },
-  methods: {
 
-    fetchData() {
-      this.listLoading = true
-      getCourseCate({cateId:1}).then(response => {
-        this.skuAttribute = response.data.skuAttributeList
-        this.goodAttribute = response.data.goodAttributeList
-      }).finally(
-        this.listLoading = false
-      )
+  methods: {
+    async initData() {
+      for (var i = 0; i < this.maxFile; i ++ ){
+        this.uploadFiles.push({index:i,file:null,url:null})
+      }
+
+      const cateRes = await getGoodCate({cateId:this.form.categoryId}).catch(e => {
+        this.$message.error(e)
+      });
+
+      if (cateRes.success){
+        this.skuAttribute = cateRes.data.skuAttributeList
+        this.goodAttribute = cateRes.data.goodAttributeList
+      }else{
+        this.$message.error("类目信息请求失败:" + cateRes.errorMsg)
+      }
+
+      if (this.isEdit){
+        const goodDetail = await getGoodDetail({goodId:this.form.id}).catch(e => {
+          this.$message.error(e)
+        });
+        
+        if (goodDetail.success){
+          this.form.title = goodDetail.data.title;
+          this.form.detail = goodDetail.data.detail;
+
+          for (var i = 0; i < Math.min(goodDetail.data.images.length, this.uploadFiles.length); i++){
+            this.uploadFiles[i]["url"] = goodDetail.data.images[i].url;
+            this.uploadFiles[i]["file"] = goodDetail.data.images[i].file;
+          }
+
+          this.goodAttribute.forEach(o=>{
+            o.value = this.getGoodAttrValueById(goodDetail.data.specs, o.id);
+          })
+
+          this.skuAttribute.forEach(o=>{
+            o.values = this.getSkuAttrValuesById(goodDetail.data.skuAttrs, o.id)
+          })
+
+          this.updateSku();
+          this.skuList.forEach(o=>{
+            this.updateLocalSkuByGoodSku(goodDetail.data.skus, o)
+          })
+          this.skuList = this.skuList.slice(0)
+
+        }else{
+          this.$message.error("产品信息请求失败:" + goodDetail.errorMsg)
+        }
+      }
     },
 
-    // onEidtAttibuteValue(event, value){
-    //   console.log(event)
-    //   console.log(value)
-    //   value.v = event
-    //   this.skuAttribute = this.skuAttribute.slice(0)
-    // },
+    updateLocalSkuByGoodSku(goodSkuList, localSku){
+      for (var i = 0; i < goodSkuList.length; i++){
+        var goodSku = goodSkuList[i];
+        // console.log("goodsku:" + JSON.stringify(goodSku.specs))
+        // console.log("localSku:" + JSON.stringify(localSku.specList))
+        if (JSON.stringify(goodSku.specs) === JSON.stringify(localSku.specList)){
+          localSku.price = goodSku.price;
+          localSku.quantity = goodSku.quantity;
+        }
+      }
+    },
+
+    getGoodAttrValueById(specList, attrId){
+      for (var i = 0; i < specList.length; i++){
+        var spec = specList[i];
+        if (spec.attrId === attrId){
+          return JSON.parse(spec.attrValue)
+        }
+      }
+      return null;
+    },
+    
+    getSkuAttrValuesById(skuAttrList, attrId){
+      for (var i = 0; i < skuAttrList.length; i++){
+        var skuAttr = skuAttrList[i];
+        if (skuAttr.id === attrId){
+          console.log(skuAttr.attrValues)
+          return skuAttr.attrValues.map(o=>{return {v:o.value}})
+        }
+      }
+      return null;
+    },
 
     onAddAttribute(item){
       if (item.values === null || item.values === undefined){
         item.values = [];
       }
-      item.values.push({
-      })
+      item.values.push({})
       this.skuAttribute = this.skuAttribute.slice(0)
     },
 
@@ -225,7 +246,10 @@ export default {
       this.updateSku();
     },
 
+    // 根据设置sku属性值，生成笛卡儿积的sku列表
     updateSku(){
+
+      //筛选出有效的sku属性值
       let skuAvailable = true;
       for (var attribute of this.skuAttribute){
         if (attribute.values === null || attribute.values === undefined){
@@ -238,29 +262,29 @@ export default {
       }
       this.skuAttribute = this.skuAttribute.slice(0)
 
+
+      //生成新的sku属性头，以及完整的sku列表
       this.skuHeads = [];
       if (skuAvailable){
-        this.skuDTOList = this.generateSkuByAttribute(this.skuAttribute)
         for (var attribute of this.skuAttribute){
           this.skuHeads.push({
             key:attribute.id.toString(),
             name:attribute.name
           })
         }
-        // this.skuHeads.push('price')
-        // this.skuHeads.push('quantity')
+        this.skuList = this.generateSkuByAttribute(this.skuAttribute)
       }else{
-        this.skuDTOList = [];
+        this.skuList = [];
       }
     },
 
+    // 根据设置sku属性值，生成笛卡儿积的sku列表
     generateSkuByAttribute(attributeList){
       if (attributeList.length === 1){
         let attrId = attributeList[0].id;
         let attrKey = attrId.toString();
         let attrValues = attributeList[0].values;
         let skuItems = []
-        console.log(attrValues)
         for (var value of attrValues){
           let spec = {
             attrId:attrId,
@@ -277,109 +301,42 @@ export default {
       }
     },
 
-    async onSubmit() {
-      this.$message('submit!')
+    imageChanged(data){
+      let uploadFile = this.uploadFiles[data.index];
+      uploadFile.file = data.file;
+      uploadFile.url = data.url;
+    },
 
-      this.form.images = this.uploadFiles.map(item=>{
-        return {url:item.fileName}
+    async onSubmit() {
+      let uploadFileList = this.uploadFiles.filter(s => {return s.file && s.file.trim()})
+      this.form.images = uploadFileList.map(item=>{
+        return {url:item.url,file:item.file}
       });
-      this.form.skuDTOList = this.skuDTOList
+
+      this.form.skuDTOList = this.skuList
       this.form.specList = this.goodAttribute.map(item=>{
         return {attrId:item.id,attrValue:JSON.stringify(item.value)}
       })
 
-      console.log(this.form)
-
-      const res = await addCourse(this.form).catch(e =>{
-        return this.$message.error(ex)
-      })
-    },
-
-    onCancel() {
-      this.$message({
-        message: 'cancel!',
-        type: 'warning'
-      })
-    },
-
-    async uploadOss(params){
-      let file = params.file;
-      let size = file.size / 1024;
-      if (size >= 150){
-          this.$message.error("图片大小不能超过150kb");
-          return;
+      console.log("sumbit:", this.form);
+      var res;
+      if (this.isEdit){
+        res = await updateGood(this.form)
+      }else{
+        res = await addGood(this.form);
       }
 
-      let key = uuidv4() + "_" + file.name;
-
-      const res = await getOssPolicy().catch(ex => {
-          return this.$message.error(ex)
-      })
-      console.log(res);
-
-      if (res.success === false){
-          return this.$message.error('获取发布令牌失败:'+ res.errorMsg);
+      if (res.success){
+        this.$message.success("发布成功")
+        this.$router.push({path:'/product/course'})
+      }else{
+        this.$message.error("发布失败:"+res.errorMsg)
       }
-
-      //上传图片
-      let ossPolicy = res.data;
-      let sendData = new FormData();
-      sendData.append('OSSAccessKeyId', ossPolicy.accessid);
-      sendData.append('policy', ossPolicy.policy);
-      sendData.append('Signature', ossPolicy.signature);
-      sendData.append('keys', ossPolicy.dir);
-      sendData.append('key',key)
-      sendData.append('success_action_status', 200) // 指定返回的状态码
-      sendData.append('file', file)
-
-      let uploadError = false;
-      await axios.post(ossPolicy.host, sendData).then(() => {
-          console.log('得到上传到阿里云的图片：' + key)
-      }).catch(ex => {
-          console.log(ex);
-          this.$message.error(ex);
-          uploadError = true;
-      });
-
-      if (uploadError){
-          return;
-      }
-
-      //获取预览地址
-      const ossUrlRes = await generateOssUrl(key).catch(ex => {
-          this.$message.error(ex);
-      });
-      console.log(ossUrlRes);
-
-      if (ossUrlRes.success == false){
-          return this.$message.error('获取发布图片地址失败:'+ res.errorMsg);
-      }
-      this.handleFileSuccess(key, ossUrlRes.data.publicUrl)
     },
-      
-    handleFileSuccess(fileName, url){
-      let length = this.uploadFiles.length;
-      console.log(length)
-      this.uploadFiles.push({
-          fileName:fileName,
-          url:url,
-          pos:length
-      })
+
+    inputchange(){
+      this.$forceUpdate();
     },
-    handleSuccess(response){
-        // const picinfo={pic:response.data.tmp_path}
-        // this.addform.pics.push(picinfo)
-    },
-    //移除图片
-    handleRemove(file){
-        // const filepath=file.response.data.tmp_path
-        // const i= this.addform.pics.findIndex(x=>x.pic===filepath)
-        // this.addform.pics.splice(i,1)
-    },
-    handlePreview(file){
-        // this.prepath=file.response.data.url
-        // this.preVisible=true
-    }
   }
 }
 </script>

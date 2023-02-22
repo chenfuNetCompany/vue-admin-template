@@ -9,6 +9,14 @@ export function addGood(data) {
   })
 }
 
+export function updateGood(data) {
+  return request({
+    url: '/good/update',
+    method: 'post',
+    data
+  })
+}
+
 export function getGoodList(params) {
   return request({
     url: '/good/list',
@@ -22,5 +30,45 @@ export function getGoodCate(params) {
     url: '/good/category',
     method: 'get',
     params
+  })
+}
+
+export function getGoodDetail(params) {
+  return request({
+    url: '/good/detail',
+    method: 'get',
+    params
+  })
+}
+
+export function online(data) {
+  return request({
+    url: '/good/online',
+    method: 'post',
+    data
+  })
+}
+
+export function offline(data) {
+  return request({
+    url: '/good/offline',
+    method: 'post',
+    data
+  })
+}
+
+export function recommend(data) {
+  return request({
+    url: '/good/recommend',
+    method: 'post',
+    data
+  })
+}
+
+export function unrecommend(data) {
+  return request({
+    url: '/good/unrecommend',
+    method: 'post',
+    data
   })
 }

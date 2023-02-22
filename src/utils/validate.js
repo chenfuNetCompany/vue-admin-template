@@ -18,3 +18,12 @@ export function validUsername(str) {
   const valid_map = ['admin', 'editor']
   return valid_map.indexOf(str.trim()) >= 0
 }
+
+export function validObj(obj) {
+  return obj != null && obj != undefined;
+}
+
+export function validString(str) {
+  return validObj(str) && str.length > 0;
+}
+

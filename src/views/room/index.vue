@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-button type="primary" @click="clickAddCoach()">添加教练</el-button>
+    <el-button type="primary" @click="clickAddRoom()">添加场地</el-button>
     <el-table
       v-loading="listLoading"
       :data="list"
@@ -15,15 +15,16 @@
         </template> -->
       </el-table-column>
       
-      <el-table-column width="120" label="头像" style="align:center">
+      <el-table-column width="120" label="照片" style="align:center">
           <template slot-scope="scope">
-              <img :src="scope.row.avatarUrl" width="100" height="100"/>
+              <img :src="scope.row.imageUrl" width="100" height="100"/>
           </template>
       </el-table-column>
 
-      <el-table-column label="姓名" width="200" prop="name"></el-table-column>
-      <el-table-column label="场馆" width="200" prop="roomName"></el-table-column>
-      <el-table-column label="关联账号" width="200" prop="account"></el-table-column>
+      <el-table-column label="名称" width="200" prop="name"></el-table-column>
+      <el-table-column label="地址" width="200" prop="address"></el-table-column>
+      <el-table-column label="经度" width="100" prop="longitude"></el-table-column>
+      <el-table-column label="纬度" width="100" prop="latitude"></el-table-column>
       <el-table-column label="操作" width="130px">
         <template slot-scope="scope">
           <el-button type="text" icon="el-icon-edit" size="mini" @click="editRow(scope.row)" >编辑</el-button>
@@ -40,59 +41,38 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="total" background>
     </el-pagination>
-    <el-dialog title="添加教练" :visible.sync="dialogAddVisible" width="500px">
+    <el-dialog title="添加场馆" :visible.sync="dialogAddVisible" width="500px">
       <el-form :model="form" text-align="left" label-position="top">
-          <el-form-item label="name" label-width="200">
-              <el-input placeholder="请输入教练名字" style="width:280px;" v-model="form.name" clearable/>
-          </el-form-item>
-          <el-form-item label="头像(支持jpg/jpeg/png文件，且不超过250kb)">
+          <el-form-item label="照片(支持jpg/jpeg/png文件，且不超过250kb)">
             <OssUploader 
-              v-bind:file="form.avatar"
-              v-bind:url="form.avatarUrl"
-              @valueChanged="avatorChanged" >
+              v-bind:file="form.image"
+              v-bind:url="form.imageUrl"
+              @valueChanged="imageChanged" >
             </OssUploader>
           </el-form-item>
-          <el-form-item label="所属场馆">
-            <el-select
-              v-model="form.roomId"
-              allow-create
-              filterable 
-              collapse-tags
-              placeholder="请选择">
-              <el-option
-                v-for="row in roomOptions"
-                :key="row.id"
-                :label="row.name"
-                :value="row.id">
-              </el-option>
-            </el-select>
+          <el-form-item label="名称" label-width="200">
+              <el-input placeholder="请输入场馆名称" style="width:280px;" v-model="form.name" clearable/>
           </el-form-item>
-          <el-form-item label="关联账号">
-            <el-select
-              v-model="form.accountId"
-              allow-create
-              filterable 
-              collapse-tags
-              placeholder="请选择">
-              <el-option
-                v-for="row in accountOptions"
-                :key="row.id"
-                :label="row.account"
-                :value="row.id">
-              </el-option>
-            </el-select>
+          <el-form-item label="地址" label-width="200">
+              <el-input placeholder="请输入场馆地址" style="width:280px;" v-model="form.address" clearable/>
+          </el-form-item>
+          <el-form-item label="经度" label-width="200">
+              <el-input placeholder="请输入场馆经度" style="width:280px;" v-model="form.longitude" clearable/>
+          </el-form-item>
+          <el-form-item label="纬度" label-width="200">
+              <el-input placeholder="请输入场馆纬度" style="width:280px;" v-model="form.latitude" clearable/>
           </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
           <el-button @click="dialogAddVisible = false">取 消</el-button>
-          <el-button type="primary" @click="onAddCoach()">确 定</el-button>
+          <el-button type="primary" @click="onAddRoom()">确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { addCoach, updateCoach, deleteCoach, getCoachList, getCoachAccountList } from '@/api/coach'
+import { addRoom, updateRoom, deleteRoom, getRoomList } from '@/api/room'
 import OssUploader from "@/components/OssUploader"
 
 export default {
@@ -116,45 +96,32 @@ export default {
         pageSize:10,
       },
       form:{
-        roomId:null,
+        id:null,
         name:null,
-        avatar:null,
-        avatarUrl:null,
-        accountId:null,
+        image:null,
+        imageUrl:null,
+        address:null,
+        longitude:null,
+        latitude:null,
       },
       list: null,
       listLoading: true,
       total:0,
       dialogAddVisible:false,
       isEdit:false,
-      roomOptions:[],
-      accountOptions:[],
     }
   },
   created() {
-    this.initData()
     this.fetchData()
   },
   methods: {
     fetchData() {
       this.listLoading = true
-      getCoachList(this.params).then(response => {
+      getRoomList(this.params).then(response => {
         this.list = response.data.listData
         this.total = response.data.totalCount
         this.listLoading = false
       })
-    },
-
-    async initData(){
-      const roomList = await getRoomList({page:1,pageSize:100}).catch(e =>{
-        return this.$message.error(e)
-      })
-      this.roomOptions = roomList.data.listData
-
-      const accountList = await getCoachAccountList({}).catch(e =>{
-        return this.$message.error(e)
-      })
-      this.accountOptions = accountList.data
     },
     
     handleSizeChange(newsize){
@@ -167,7 +134,7 @@ export default {
       this.fetchData()
     },
 
-    clickAddCoach(){
+    clickAddRoom(){
       this.form = {};
       this.isEdit = false
       this.dialogAddVisible = true;
@@ -179,9 +146,9 @@ export default {
       this.dialogAddVisible = true;
     },
 
-    async onAddCoach(){
+    async onAddRoom(){
       if (this.isEdit){
-        await updateCoach(this.form).catch(e =>{
+        await updateRoom(this.form).catch(e =>{
           return this.$message.error(e)
         })
 
@@ -191,7 +158,7 @@ export default {
         return;
       }
 
-      await addCoach(this.form).catch(e =>{
+      await addRoom(this.form).catch(e =>{
         return this.$message.error(e)
       })
 
@@ -201,7 +168,7 @@ export default {
     },
 
     async removebyid(coachId){
-      const result = await deleteCoach({id:coachId}).catch(e =>{
+      const result = await deleteRoom({id:coachId}).catch(e =>{
         this.$message.error(e)
       })
 
@@ -211,10 +178,9 @@ export default {
       }
     },
 
-    avatorChanged(data){
-      console.log(data)
-      this.form.avatar = data.file;
-      this.form.avatarUrl = data.url;
+    imageChanged(data){
+      this.form.image = data.file;
+      this.form.imageUrl = data.url;
     },
 
   }

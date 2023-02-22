@@ -90,28 +90,34 @@ export const constantRoutes = [
         component: () => import('@/views/coach/index'),
         meta: { title: '教练管理', icon: 'table' }
       },
+      {
+        path: 'room',
+        name: '场馆管理',
+        component: () => import('@/views/room/index'),
+        meta: { title: '场馆管理', icon: 'table' }
+      },
     ]
   },
 
   {
-    path: '/course',
+    path: '/product',
     component: Layout,
-    redirect: '/course/table',
-    name: '课程管理',
-    meta: { title: '课程管理', icon: 'el-icon-s-help' },
+    // redirect: '/course/table',
+    name: '产品管理',
+    meta: { title: '产品管理', icon: 'el-icon-s-help' },
     children: [
       {
-        path: 'table',
-        name: '课程列表',
+        path: 'course',
+        name: '课程管理',
         component: () => import('@/views/course/index'),
         meta: { title: '课程列表', icon: 'table' }
       },
       {
-        path: 'add',
-        name: '添加课程',
+        path: 'course/add',
+        name: '课程添加',
         component: () => import('@/views/course/add'),
-        meta: { title: '添加课程', icon: 'form' }
-      }
+        meta: { title: '课程添加', icon: 'form' }
+      },
     ]
   },
 
