@@ -21,7 +21,7 @@
       <!--------------------------- 测试项目区域 ---------------------------->
       <el-col :span="12">
         <el-button type="primary" @click="clickAddSubject" :disabled="params.cateId === null || params.cateId === undefined">添加项目</el-button>
-        <el-table :data="subjectList" border fit v-loading="listLoading">
+        <el-table :data="subjectList" border fit v-loading="listLoading" default-expand-all>
           <el-table-column align="center" label="项目ID" width="95" prop="id"></el-table-column>
           <el-table-column label="项目名称" width="120" prop="name"></el-table-column>
           <el-table-column label="项目创建人" width="120" prop="creator"></el-table-column>

@@ -185,17 +185,17 @@ export const constantRoutes = [
     meta: { title: '体测管理', icon: 'el-icon-s-help' },
     children: [
       {
-        path: 'table',
-        name: '体测记录',
-        component: () => import('@/views/exam/index'),
-        meta: { title: '体测记录', icon: 'table' }
-      },
-      {
         path: 'subject',
         name: '项目管理',
         component: () => import('@/views/exam/subject'),
         meta: { title: '项目管理', icon: 'table' }
-      }
+      },
+      {
+        path: 'table',
+        name: '体测记录',
+        component: () => import('@/views/exam/record'),
+        meta: { title: '体测记录', icon: 'table' }
+      },
     ]
   },
 

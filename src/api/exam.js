@@ -48,3 +48,11 @@ export function getCateList(params) {
     params
   })
 }
+
+export function getRecordList(params) {
+  return request({
+    url: '/exam/record/list',
+    method: 'get',
+    params
+  })
+}
