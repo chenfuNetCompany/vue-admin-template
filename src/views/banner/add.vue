@@ -80,7 +80,7 @@ export default {
       actionOptions:[
         {value:1,label:'新闻'},
         {value:2,label:'产品'},
-        {value:3,label:'运动档案'}
+        {value:3,label:'网页'}
       ],
       actionParamOptions:{
         1:[
@@ -89,7 +89,9 @@ export default {
         2:[
           {name:'产品ID',key:"id",value:null}
         ],
-        3:[]
+        3:[
+          {name:'新闻地址',key:"url",value:null}
+        ]
       },
       actionParams:[],
     }

@@ -93,6 +93,7 @@
 
 <script>
 import { addCoach, updateCoach, deleteCoach, getCoachList, getCoachAccountList } from '@/api/coach'
+import { getRoomList } from '@/api/room'
 import OssUploader from "@/components/OssUploader"
 
 export default {

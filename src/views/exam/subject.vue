@@ -1,32 +1,31 @@
 <template>
   <div class="app-container">
     <el-row :gutter="20">
-      <el-col :span="6">
-        <el-button type="primary" @click="clickAddSubject">添加类目</el-button>
-        <el-tree
-          :data="cateList"
-          default-expand-all
-          node-key="id"
-          ref="tree"
-          highlight-current
-          :props="defaultProps">
-        </el-tree>
+
+      <!------------------------------ 测试类目区域 ------------------------------->
+      <el-col :span="8">
+        <el-button type="primary" @click="clickAddCate">添加类目</el-button>
+        <el-table :data="cateList" border fit highlight-current-row @current-change="onCateChange">
+          <el-table-column label="类目ID" width="100" prop="id"></el-table-column>
+          <el-table-column label="类目名称" width="100" prop="name"></el-table-column>
+          <el-table-column label="操作">
+            <template slot-scope="scope">
+              <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyid(scope.row.id)" >编辑</el-button>
+              <el-button type="text" icon="el-icon-delete" size="mini" @click="removebyid(scope.row.id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
       </el-col>
-      <el-divider :span="2" direction="vertical" content-position="center"/>
-      <el-col :span="16">
-        <el-button type="primary" @click="clickAddSubject">添加项目</el-button>
-        <el-table
-          v-loading="listLoading"
-          :data="subjectList"
-          element-loading-text="Loading"
-          border
-          fit
-          highlight-current-row
-        >
+      <el-divider :span="4" direction="vertical" content-position="center"/>
+
+      <!--------------------------- 测试项目区域 ---------------------------->
+      <el-col :span="12">
+        <el-button type="primary" @click="clickAddSubject" :disabled="params.cateId === null || params.cateId === undefined">添加项目</el-button>
+        <el-table :data="subjectList" border fit v-loading="listLoading">
           <el-table-column align="center" label="项目ID" width="95" prop="id"></el-table-column>
-          <el-table-column label="项目名称" width="100" prop="name"></el-table-column>
-          <el-table-column label="项目创建人" width="100" prop="creator"></el-table-column>
-          <el-table-column label="操作" width="250px">
+          <el-table-column label="项目名称" width="120" prop="name"></el-table-column>
+          <el-table-column label="项目创建人" width="120" prop="creator"></el-table-column>
+          <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyid(scope.row.id)" >编辑</el-button>
               <el-button type="text" icon="el-icon-delete" size="mini" @click="removebyid(scope.row.id)">删除</el-button>
@@ -35,14 +34,7 @@
           </el-table-column>
           <el-table-column type="expand">
             <template slot-scope="props">
-              <el-table
-              class="table-in-table"
-              :data="props.row.indexList"
-              style="width: 100%;"
-              row-key="id"
-              border
-              stripe
-              >
+              <el-table class="table-in-table" :data="props.row.indexList" style="width: 100%;" row-key="id" border stripe>
                 <el-table-column label="指标ID" width="95" prop="id"></el-table-column>
                 <el-table-column label="指标名称" width="100" prop="name"></el-table-column>
                 <el-table-column label="指标创建人" width="100" prop="creator"></el-table-column>
@@ -63,14 +55,29 @@
           :page-size="params.pageSize"
           :page-sizes="[5, 10, 15, 20]"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="total" background>
+          :total="total" 
+          background>
         </el-pagination>
       </el-col>
     </el-row>
 
+    <!-- 添加类目 -->
+    <el-dialog title='添加类目' :visible.sync="cateVisible" width="500px">
+      <el-form :model="cateForm">
+          <el-form-item label="名称" label-width="200">
+              <el-input placeholder="请输入类目名称" style="width:280px;" v-model="cateForm.name"/>
+          </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+          <el-button @click="subjectVisible = false">取 消</el-button>
+          <el-button type="primary" @click="onAddCate()">确 定</el-button>
+      </div>
+    </el-dialog>
+
     <!-- 添加项目 -->
     <el-dialog title='添加项目' :visible.sync="subjectVisible" width="500px">
       <el-form :model="subjectForm">
+          <el-form-item label="类目" label-width="200">{{ params.cateName }}</el-form-item>
           <el-form-item label="名称" label-width="200">
               <el-input placeholder="请输入项目名称" style="width:280px;" v-model="subjectForm.name"/>
           </el-form-item>
@@ -116,45 +123,80 @@ export default {
       params:{
         page:1,
         pageSize:10,
-        cateId:1
+        cateId:null,
+        cateName:null,
       },
-      subjectList: null,
-      cateList: [],
-      listLoading: true,
+
       subjectForm:{
-        name:"",
+        cateId:null,
+        name:null,
       },
       indexForm:{
         name:"",
       },
+      cateForm:{
+        name:""
+      },
+      subjectList: null,
+      cateList: [],
+      listLoading: false,
       subjectVisible:false,
       indexVisible:false,
-      cateId:1,
+      cateVisible:false,
       subjectId:null,
       defaultProps: {
         label: 'name'
-      }
+      },
+      total:0,
     }
   },
   created() {
     this.fetchCateData()
   },
   methods: {
-    fetchSubjectData() {
-      this.listLoading = true
-      getSubjectList(this.params).then(response => {
-        this.subjectList = response.data.listData
-        this.total = response.data.totalCount
-        this.listLoading = false
+
+    //////////类目相关//////////////////////////////
+    async fetchCateData() {
+      const cateRes = await getCateList();
+      if (cateRes.success === true){
+        this.cateList = cateRes.data
+      }else{
+        this.$message.error(cateRes.errorMsg)
+      }
+    },
+
+    onCateChange(node){
+      console.log(node)
+      this.params.cateId = node.id;
+      this.params.cateName = node.name;
+      this.fetchSubjectData();
+    },
+
+    clickAddCate(){
+      this.cateForm = {};
+      this.cateVisible = true;
+    },
+
+    onAddCate(){
+      addCate(this.cateForm).then(response =>{
+        this.$message.success('添加成功')
+        this.cateVisible = false;
+        this.fetchCateData();
       })
     },
 
-    fetchCateData() {
+    //////////项目相关//////////////////////////////
+    async fetchSubjectData() {
       this.listLoading = true
-      getCateList().then(response => {
-        this.cateList = response.data.listData
-        this.listLoading = false
-      })
+      const subjectRes = await getSubjectList(this.params);
+      this.listLoading = false
+
+      if (subjectRes.success === true){
+        this.subjectList = subjectRes.data.listData
+        this.total = subjectRes.data.totalCount
+      }else{
+        this.$message.error(cateRes.errorMsg)
+      }
     },
     
     handleSizeChange(newsize){
@@ -168,11 +210,11 @@ export default {
     },
 
     onAddSubject(){
-      this.subjectForm['cateId']=this.cateId
+      this.subjectForm['cateId']= this.params.cateId
       addSubject(this.subjectForm).then(response =>{
         this.$message.success('添加成功')
         this.subjectVisible = false;
-        this.fetchData();
+        this.fetchSubjectData();
       })
     },
 
@@ -181,6 +223,7 @@ export default {
       this.subjectVisible = true;
     },
 
+    //////////指标相关//////////////////////////////
     clickAddIndex(subjectId){
       this.subjectId = subjectId;
       this.indexForm = {};
@@ -192,9 +235,16 @@ export default {
       addIndex(this.indexForm).then(response =>{
         this.$message.success('添加成功')
         this.indexVisible = false;
-        this.fetchData();
+        this.fetchSubjectData();
       })
     },
   }
 }
 </script>
+
+<style scoped>
+.el-tree-node__label
+{
+    font-size: 18px;
+}
+</style>
