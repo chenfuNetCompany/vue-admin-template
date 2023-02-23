@@ -15,9 +15,9 @@
         </template> -->
       </el-table-column>
       
-      <el-table-column width="120" label="头像" style="align:center">
+      <el-table-column width="80" label="头像" style="align:center">
           <template slot-scope="scope">
-              <img :src="scope.row.avatarUrl" width="100" height="100"/>
+              <img :src="scope.row.avatarUrl" width="60" height="60"/>
           </template>
       </el-table-column>
 
@@ -42,44 +42,20 @@
     </el-pagination>
     <el-dialog title="添加教练" :visible.sync="dialogAddVisible" width="500px">
       <el-form :model="form" text-align="left" label-position="top">
-          <el-form-item label="name" label-width="200">
+          <el-form-item label="名字" label-width="200">
               <el-input placeholder="请输入教练名字" style="width:280px;" v-model="form.name" clearable/>
           </el-form-item>
           <el-form-item label="头像(支持jpg/jpeg/png文件，且不超过250kb)">
-            <OssUploader 
-              v-bind:file="form.avatar"
-              v-bind:url="form.avatarUrl"
-              @valueChanged="avatorChanged" >
-            </OssUploader>
+            <OssUploader v-bind:file="form.avatar" v-bind:url="form.avatarUrl" valueChanged="avatorChanged" > </OssUploader>
           </el-form-item>
           <el-form-item label="所属场馆">
-            <el-select
-              v-model="form.roomId"
-              allow-create
-              filterable 
-              collapse-tags
-              placeholder="请选择">
-              <el-option
-                v-for="row in roomOptions"
-                :key="row.id"
-                :label="row.name"
-                :value="row.id">
-              </el-option>
+            <el-select v-model="form.roomId" allow-create filterable  collapse-tags placeholder="请选择">
+              <el-option v-for="row in roomOptions" :key="row.id" :label="row.name" :value="row.id"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="关联账号">
-            <el-select
-              v-model="form.accountId"
-              allow-create
-              filterable 
-              collapse-tags
-              placeholder="请选择">
-              <el-option
-                v-for="row in accountOptions"
-                :key="row.id"
-                :label="row.account"
-                :value="row.id">
-              </el-option>
+            <el-select v-model="form.accountId" allow-create filterable collapse-tags placeholder="请选择">
+              <el-option v-for="row in accountOptions" :key="row.id" :label="row.account" :value="row.id"></el-option>
             </el-select>
           </el-form-item>
       </el-form>
@@ -223,18 +199,4 @@ export default {
 </script>
 
 <style scoped>
-.goodpic{
-  display:flex;
-  flex-direction:column;
-  border-color: gray;
-  border-width: 0.1px;
-  border-style: solid;
-  margin-right: 10px;
-  height: 130px;
-  width: 100px;
-}
-.goodpicadd{
-  display: flex;
-  align-content:center;
-}
 </style>

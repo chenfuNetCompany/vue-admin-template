@@ -96,6 +96,18 @@ export const constantRoutes = [
         component: () => import('@/views/room/index'),
         meta: { title: '场馆管理', icon: 'table' }
       },
+      {
+        path: 'banner',
+        name: 'Banner管理',
+        component: () => import('@/views/banner/index'),
+        meta: { title: 'Banner管理', icon: 'table' }
+      },
+      {
+        path: 'news',
+        name: '新闻管理',
+        component: () => import('@/views/news/index'),
+        meta: { title: '新闻管理', icon: 'table' }
+      },
     ]
   },
 
@@ -223,50 +235,6 @@ export const constantRoutes = [
         name: '优惠券持有列表',
         component: () => import('@/views/promotion/receive'),
         meta: { title: '优惠券持有列表', icon: 'table' }
-      }
-    ]
-  },
-
-  {
-    path: '/news',
-    component: Layout,
-    redirect: '/news/table',
-    name: '新闻管理',
-    meta: { title: '新闻管理', icon: 'el-icon-s-help' },
-    children: [
-      {
-        path: 'table',
-        name: '新闻列表',
-        component: () => import('@/views/news/index'),
-        meta: { title: '新闻列表', icon: 'table' }
-      },
-      {
-        path: 'add',
-        name: '添加新闻',
-        component: () => import('@/views/news/add'),
-        meta: { title: '添加新闻', icon: 'form' }
-      }
-    ]
-  },
-
-  {
-    path: '/banner',
-    component: Layout,
-    redirect: '/banner/table',
-    name: 'Banner管理',
-    meta: { title: 'Banner管理', icon: 'el-icon-s-help' },
-    children: [
-      {
-        path: 'table',
-        name: 'Banner列表',
-        component: () => import('@/views/banner/index'),
-        meta: { title: 'Banner列表', icon: 'table' }
-      },
-      {
-        path: 'add',
-        name: '添加Banner',
-        component: () => import('@/views/banner/add'),
-        meta: { title: '添加Banner', icon: 'form' }
       }
     ]
   },

@@ -15,14 +15,14 @@
         </template> -->
       </el-table-column>
       
-      <el-table-column width="120" label="照片" style="align:center">
+      <el-table-column width="80" label="照片" style="align:center">
           <template slot-scope="scope">
-              <img :src="scope.row.imageUrl" width="100" height="100"/>
+              <img :src="scope.row.imageUrl" width="60" height="60"/>
           </template>
       </el-table-column>
 
-      <el-table-column label="名称" width="200" prop="name"></el-table-column>
-      <el-table-column label="地址" width="200" prop="address"></el-table-column>
+      <el-table-column label="名称" width="100" prop="name"></el-table-column>
+      <el-table-column label="地址" width="300" prop="address"></el-table-column>
       <el-table-column label="经度" width="100" prop="longitude"></el-table-column>
       <el-table-column label="纬度" width="100" prop="latitude"></el-table-column>
       <el-table-column label="操作" width="130px">

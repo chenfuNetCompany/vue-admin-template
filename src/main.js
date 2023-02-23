@@ -34,6 +34,7 @@ Vue.use(ElementUI, { locale })
 // Vue.use(ElementUI)
 
 Vue.prototype.$message=ElementUI.Message
+Vue.prototype.$confirm = ElementUI.MessageBox.confirm
 Vue.config.productionTip = false
 
 new Vue({

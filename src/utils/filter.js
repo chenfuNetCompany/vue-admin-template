@@ -17,3 +17,11 @@ export function goodStatusFilter(status) {
   }
   return statusMap[status]
 }
+
+export function bannerStatusFilter(status) {
+  const statusMap = {
+    1: '上架中',
+    2: '已下架',
+  }
+  return statusMap[status]
+}
