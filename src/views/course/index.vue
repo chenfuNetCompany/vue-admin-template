@@ -32,10 +32,10 @@
           </template>
       </el-table-column>
       <el-table-column label="库存" width="95" prop="quantity"></el-table-column>
-      <el-table-column label="价格" width="120">
-        <template slot-scope="scope">
+      <el-table-column label="价格" width="120" prop="displayPrice">
+        <!-- <template slot-scope="scope" v-show="scope.row.hasSku === true">
           {{ scope.row.minPrice}} ~ {{ scope.row.maxPrice}}
-        </template>
+        </template> -->
       </el-table-column>
       <el-table-column label="状态" width="110">
         <template slot-scope="scope">{{statusFilter(scope.row.status)}}</template>
@@ -71,6 +71,7 @@
 import { addGood, getGoodList, getGoodCate, online, offline, recommend, unrecommend } from '@/api/good'
 import { booleanFilter, goodStatusFilter} from '@/utils/filter'
 import { throwStatement } from '@babel/types';
+import { validObj } from '@/utils/validate';
 
 export default {
   data() {
@@ -107,6 +108,16 @@ export default {
         this.list = response.data.listData
         this.total = response.data.totalCount
         this.listLoading = false
+        
+        if (validObj(this.list)){
+          this.list.forEach(element => {
+            if (element.hasSku === true){
+              element.displayPrice = element.minPrice + '~' + element.maxPrice;
+            }else{
+              element.displayPrice = element.price;
+            }
+          });
+        }
       })
     },
     

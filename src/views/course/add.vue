@@ -204,25 +204,35 @@ export default {
       if (this.isEdit){
         this.form.title = goodDetail.title;
         this.form.detail = goodDetail.detail;
+        this.form.detailImage = goodDetail.detailImage;
+        this.form.detailImageUrl = goodDetail.detailImageUrl;
+        this.form.price = goodDetail.price;
+        this.form.quantity = goodDetail.quantity;
 
         for (var i = 0; i < Math.min(goodDetail.images.length, this.uploadFiles.length); i++){
           this.uploadFiles[i]["url"] = goodDetail.images[i].url;
           this.uploadFiles[i]["file"] = goodDetail.images[i].file;
         }
 
-        this.goodAttribute.forEach(o=>{
-          o.value = this.getGoodAttrValueById(goodDetail.specs, o.id);
-        })
+        if (validObj(this.goodAttribute)){
+          this.goodAttribute.forEach(o=>{
+            o.value = this.getGoodAttrValueById(goodDetail.specs, o.id);
+          })
+        }
 
-        this.skuAttribute.forEach(o=>{
-          o.values = this.getSkuAttrValuesById(goodDetail.skuAttrs, o.id)
-        })
-
+        if (validObj(this.skuAttribute)){
+          this.skuAttribute.forEach(o=>{
+            o.values = this.getSkuAttrValuesById(goodDetail.skuAttrs, o.id)
+          })
+        }
+        
         this.updateSku();
-        this.skuList.forEach(o=>{
-          this.updateLocalSkuByGoodSku(goodDetail.skus, o)
-        })
-        this.skuList = this.skuList.slice(0)
+        if (validObj(this.skuList)){
+          this.skuList.forEach(o=>{
+            this.updateLocalSkuByGoodSku(goodDetail.skus, o)
+          })
+          this.skuList = this.skuList.slice(0)
+        }
       }
     },
 
@@ -324,6 +334,7 @@ export default {
         }
         return skuItems;
       }
+      return [];
     },
 
     imageChanged(data){
