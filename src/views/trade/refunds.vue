@@ -9,7 +9,15 @@
         highlight-current-row
       >
         <el-table-column style="align:center" label="交易订单ID" width="95" prop="orderId"></el-table-column>
+        <el-table-column width="120" label="商品主图" style="align:center" prop="goodImage">
+          <template slot-scope="scope">
+              <img :src="scope.row.goodImage" width="60" height="60"/>
+          </template>
+        </el-table-column>
+        <el-table-column width="120" label="商品标题" style="align:center" prop="goodName"></el-table-column>
         <el-table-column width="120" label="退款金额" prop="amount"></el-table-column>
+        <el-table-column width="200" label="买家账号" prop="userAccount"></el-table-column>
+        <el-table-column width="120" label="买家手机" prop="userMobile"></el-table-column>
         <el-table-column width="120" label="退款状态" prop="statusText"></el-table-column>
         <el-table-column label="操作" width="130px">
           <template slot-scope="scope">

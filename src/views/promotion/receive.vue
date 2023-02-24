@@ -2,7 +2,7 @@
     <div class="app-container">
       <el-form ref="form" :model="form" text-align="left" label-position="left" :inline="true" >
         <el-form-item label="状态">
-          <el-select v-model="params.status" placeholder="请选择">
+          <el-select v-model="params.status" placeholder="请选择" clearable>
             <el-option
               v-for="item in statuOptions"
               :key="item.value"
@@ -11,9 +11,9 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="用户手机">
+        <!-- <el-form-item label="用户手机">
           <el-input v-model="params.status">确定</el-input>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item>
           <el-button type="primary" @click="fetchData">确定</el-button>
         </el-form-item>
@@ -32,7 +32,7 @@
         <el-table-column width="200" label="用户账号" prop="userAccount"></el-table-column>
         <el-table-column width="120" label="用户手机" prop="userMobile"></el-table-column>
         <el-table-column width="120" label="状态" prop="statusText"></el-table-column>
-        <el-table-column width="120" label="获取时间" prop="createTime"></el-table-column>
+        <el-table-column width="180" label="获取时间" prop="createTime"></el-table-column>
       </el-table>
       <el-pagination
         @size-change="handleSizeChange"
@@ -81,13 +81,14 @@
       fetchData() {
         this.listLoading = true
         couponMemberList(this.params).then(response => {
-          this.list = response.data.listData
-          this.total = response.data.totalCount
+            this.list = response.data.listData
+            this.total = response.data.totalCount
+            this.list.forEach(element => {
+              element["statusText"] = this.statusFilter(element.status);
+            })
+        }).finally(
           this.listLoading = false
-          this.list.forEach(element => {
-            element["statusText"] = this.statusFilter(element.status);
-          });
-        })
+        )
       },
       
       handleSizeChange(newsize){

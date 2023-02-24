@@ -56,28 +56,6 @@ export const constantRoutes = [
   },
 
   {
-    path: '/account',
-    component: Layout,
-    redirect: '/account/table',
-    name: '账号管理',
-    meta: { title: '账号管理', icon: 'el-icon-s-help' },
-    children: [
-      {
-        path: 'table',
-        name: '账号列表',
-        component: () => import('@/views/account/index'),
-        meta: { title: '账号列表', icon: 'table' }
-      },
-      {
-        path: 'add',
-        name: '添加账号',
-        component: () => import('@/views/account/add'),
-        meta: { title: '添加账号', icon: 'form' }
-      }
-    ]
-  },
-
-  {
     path: '/base',
     component: Layout,
     // redirect: '/course/table',
@@ -219,12 +197,6 @@ export const constantRoutes = [
     meta: { title: '营销管理', icon: 'el-icon-s-help' },
     children: [
       {
-        path: 'add',
-        name: '创建优惠券',
-        component: () => import('@/views/promotion/add'),
-        meta: { title: '创建优惠券', icon: 'form' }
-      },
-      {
         path: 'table',
         name: '优惠券列表',
         component: () => import('@/views/promotion/index'),
@@ -235,6 +207,28 @@ export const constantRoutes = [
         name: '优惠券持有列表',
         component: () => import('@/views/promotion/receive'),
         meta: { title: '优惠券持有列表', icon: 'table' }
+      }
+    ]
+  },
+  
+  {
+    path: '/account',
+    component: Layout,
+    redirect: '/account/table',
+    name: '账号管理',
+    meta: { title: '账号管理', icon: 'el-icon-s-help' },
+    children: [
+      {
+        path: 'table',
+        name: '账号列表',
+        component: () => import('@/views/account/index'),
+        meta: { title: '账号列表', icon: 'table' }
+      },
+      {
+        path: 'add',
+        name: '添加账号',
+        component: () => import('@/views/account/add'),
+        meta: { title: '添加账号', icon: 'form' }
       }
     ]
   },

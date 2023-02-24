@@ -1,5 +1,6 @@
 <template>
     <div class="app-container">
+      <el-button type="primary" @click="clickAddPromtion">添加优惠券</el-button>
       <el-table
         v-loading="listLoading"
         :data="list"
@@ -14,9 +15,10 @@
         <el-table-column width="120" label="总数" prop="totalCount"></el-table-column>
         <el-table-column width="120" label="领取数量" prop="receiveCount"></el-table-column>
         <el-table-column width="120" label="使用数量" prop="usedCount"></el-table-column>
+        <el-table-column width="180" label="创建时间" prop="createTime"></el-table-column>
         <el-table-column label="操作" width="130px">
           <template slot-scope="scope">
-            <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyid(scope.row.id)" >编辑</el-button>
+            <!-- <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyid(scope.row.id)" >编辑</el-button> -->
             <el-button type="text" icon="el-icon-delete" size="mini" @click="distbyid(scope.row.id)">发放</el-button>
           </template>
         </el-table-column>
@@ -31,8 +33,8 @@
         :total="total" background>
       </el-pagination>
 
-      <el-dialog :title="发放优惠券" :visible.sync="dialogOrderVisible" width="500px">
-		    <el-form :model="selectCoupon">
+      <el-dialog title="发放优惠券" :visible.sync="dialogOrderVisible" width="500px">
+		    <el-form :model="distForm">
 		        <el-form-item label="用户" :label-width="200">
 		            <el-input placeholder="请输入用户ID" style="width:280px;" v-model="distForm.userId" clearable/>
 		        </el-form-item>
@@ -45,11 +47,22 @@
 		        <el-button type="primary" @click="distCoupon()">确 定</el-button>
 		    </div>
 		  </el-dialog>
+
+      <el-dialog title="添加优惠券" :visible.sync="dialogAddVisible" width="700px">
+        <el-form :model="form" text-align="left" label-position="top">
+          <el-form-item label="标题"><el-input v-model="form.name"/></el-form-item>
+          <el-form-item label="金额"><el-input v-model="form.val"/></el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogAddVisible = false">取 消</el-button>
+            <el-button type="primary" @click="addPromiton()">确 定</el-button>
+        </div>
+      </el-dialog>
     </div>
   </template>
   
   <script>
-  import { promotionlist , distCoupon} from '@/api/promotion'
+  import { promotionlist , distCoupon, addCoupon } from '@/api/promotion'
   
   export default {
     // filters: {
@@ -75,6 +88,12 @@
           userId:null,
           count:null
         },
+        dialogAddVisible:false,
+        isEdit:false,
+        form: {
+          name: '',
+          val: '',
+        }
       }
     },
     created() {
@@ -105,13 +124,28 @@
         this.dialogOrderVisible = true;
       },
 
+      clickAddPromtion(){
+        this.form = {};
+        this.dialogAddVisible = true;
+      },
+
+      async addPromiton() {
+        const res = await addCoupon(this.form);
+        this.dialogAddVisible = false;
+
+        if (res.success === false){
+          this.$message.error("优惠券创建失败")
+        }else{
+          this.$message.success("优惠券创建成功")
+          this.fetchData();
+        }
+      },
+
       async distCoupon(){
-        console.log(11111)
         const res = await distCoupon(this.distForm).catch(ex =>{
           this.$$message.error(ex)
         })
 
-        console.log(res)
         if (res.success === false){
           this.$message.error("优惠券发放失败")
         }

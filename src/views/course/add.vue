@@ -338,9 +338,11 @@ export default {
     },
 
     imageChanged(data){
+      console.log("data:", this.uploadFiles)
       let uploadFile = this.uploadFiles[data.index];
       uploadFile.file = data.file;
       uploadFile.url = data.url;
+      console.log(this.uploadFiles)
     },
 
     detailImageChanged(data){
