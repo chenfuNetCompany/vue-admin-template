@@ -22,6 +22,10 @@
         </div>
     </el-form-item>
 
+    <el-form-item label="商品详情图(非必传，支持jpg/jpeg/png文件，且不超过150kb)">
+      <OssUploader :file="form.detailImage" :url="form.detailImageUrl" @valueChanged="detailImageChanged" ></OssUploader>
+    </el-form-item>
+
     <el-form-item label="商品属性" v-show="goodAttribute.length > 0">
       <div style="display: flex;">
         <div v-for="(item, i) in goodAttribute" :key="i">
@@ -132,7 +136,9 @@ export default {
         skuDTOList: [],
         hasSku : true,
         categoryId : null,
-        id:null
+        id:null,
+        detailImage:null,
+        detailImageUrl:null,
       },
       uploadFiles:[
       ],
@@ -324,6 +330,11 @@ export default {
       let uploadFile = this.uploadFiles[data.index];
       uploadFile.file = data.file;
       uploadFile.url = data.url;
+    },
+
+    detailImageChanged(data){
+      this.form.detailImage = data.file;
+      this.form.detailImageUrl = data.url;
     },
 
     async onSubmit() {

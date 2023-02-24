@@ -25,8 +25,14 @@
           </template>
       </el-table-column>
       <el-table-column label="标题" width="200" prop="title"></el-table-column>
+      <el-table-column label="详情" width="200" prop="detail"></el-table-column>
+      <el-table-column width="80" label="商品详情图" style="align:center">
+          <template slot-scope="scope">
+              <img :src="scope.row.detailImageUrl" width="60" height="60"/>
+          </template>
+      </el-table-column>
       <el-table-column label="库存" width="95" prop="quantity"></el-table-column>
-      <el-table-column label="价格" width="120" prop="title">
+      <el-table-column label="价格" width="120">
         <template slot-scope="scope">
           {{ scope.row.minPrice}} ~ {{ scope.row.maxPrice}}
         </template>
