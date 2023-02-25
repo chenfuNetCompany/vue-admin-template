@@ -76,6 +76,9 @@
             else if (element.status === 2){
               element.statusText = '已付款'
             }
+            else if (element.status === 100){
+              element.statusText = '交易关闭'
+            }
             element.refundStatusText = this.refundStatusFilter(element.refundStatus)
           });
         })

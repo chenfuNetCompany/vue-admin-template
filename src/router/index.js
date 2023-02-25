@@ -163,6 +163,19 @@ export const constantRoutes = [
         name: '用户资产',
         component: () => import('@/views/customer/asset'),
         meta: { title: '用户资产', icon: 'table' }
+      },
+      {
+        path: 'booking',
+        name: '预约列表',
+        component: () => import('@/views/customer/booking'),
+        meta: { title: '预约列表', icon: 'table' }
+      },
+      {
+        path: 'assetflow',
+        name: '预约列表',
+        hidden: true,
+        component: () => import('@/views/customer/assetflow'),
+        meta: { title: '资产流水', icon: 'table' }
       }
     ]
   },
@@ -210,7 +223,7 @@ export const constantRoutes = [
       }
     ]
   },
-  
+
   {
     path: '/account',
     component: Layout,

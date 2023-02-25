@@ -15,6 +15,11 @@
         <el-table-column width="120" label="资产ID" style="align:center" prop="assetId"></el-table-column>
         <el-table-column width="120" label="资产名称" style="align:center" prop="goodName"></el-table-column>
         <el-table-column label="资产数量" width="120" prop="quantity"></el-table-column>
+        <el-table-column label="操作" width="300">
+          <template slot-scope="scope">
+            <el-button type="text" icon="el-icon-edit" size="mini" @click="gotoflow(scope.row)">明细</el-button>
+          </template>
+        </el-table-column>
       </el-table>
       <el-pagination
         @size-change="handleSizeChange"
@@ -35,7 +40,6 @@
     data() {
       return {
         params:{
-          cateId:1,
           page:1,
           pageSize:10
         },
@@ -65,6 +69,10 @@
       handleCurrentChange(newpage){
         this.params.page=newpage
         this.fetchData()
+      },
+
+      gotoflow(row){
+        this.$router.push({path:'/user/assetflow', query:{assetId:row.assetId,userId:row.userId}})
       },
     }
   }

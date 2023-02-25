@@ -18,4 +18,13 @@ export function customerAssetlist(params) {
   })
 }
 
+export function customerAssetFlowlist(params) {
+  return request({
+    // url: '/vue-admin-template/user/login',
+    url: '/user/asset/flow',
+    method: 'get',
+    params
+  })
+}
+
 
