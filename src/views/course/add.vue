@@ -30,24 +30,45 @@
       <div style="display: flex;">
         <div v-for="(item, i) in goodAttribute" :key="i">
           <div>{{item.name}}</div>
-          <el-select
-            v-model="item.value"
-            allow-create
-            filterable 
-            multiple 
-            collapse-tags
-            default-first-option
-            placeholder="请选择">
-            <el-option
-              v-for="row in item.values"
-              :key="row.value"
-              :label="row.name"
-              :value="row.value">
-            </el-option>
-          </el-select>
+          <!-- <div v-if="item.valueType === 3">
+            <el-select v-model="item.value" placeholder="请选择">
+              <el-option v-for="row in boolOptions" :key="row.value" :label="row.name" :value="row.value"></el-option>
+            </el-select>
+          </div>
+          <div v-else> -->
+            <el-select
+              v-model="item.value"
+              allow-create
+              filterable 
+              :multiple="item.valueType === 5"
+              collapse-tags
+              default-first-option
+              placeholder="请选择">
+              <el-option
+                v-for="row in item.values"
+                :key="row.value"
+                :label="row.name"
+                :value="row.value">
+              </el-option>
+            </el-select>
+          <!-- </div> -->
         </div>
       </div>
     </el-form-item>
+
+    <!-- <el-form-item label="开售时间">
+      <el-date-picker 
+        v-model="form.useTimeRange"
+        type="datetimerange"
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期">
+      </el-date-picker>
+    </el-form-item>
+
+    <el-form-item label="使用时间">
+      
+    </el-form-item> -->
 
 
     <el-form-item label="销售属性" v-show="skuAttribute.length > 0">
@@ -120,6 +141,7 @@
 import { addGood, updateGood, getGoodCate, getGoodDetail } from '@/api/good'
 import OssUploader from "@/components/OssUploader"
 import {validObj, validString} from "@/utils/validate"
+import {formatDate} from "@/utils/date"
 
 
 export default {
@@ -139,6 +161,12 @@ export default {
         id:null,
         detailImage:null,
         detailImageUrl:null,
+        saleStartAt:null,
+        saleEndAt:null,
+        saleTimeRange:null,
+        useStartAt:null,
+        useEndAt:null,
+        useTimeRange:null,
       },
       uploadFiles:[
       ],
@@ -147,7 +175,11 @@ export default {
       skuList:[],
       skuHeads:[],
       maxFile:6,
-      isEdit:false
+      isEdit:false,
+      boolOptions:[
+        {name:"是",value:true},
+        {name:"否",value:false},
+      ]
     }
   },
   
@@ -283,7 +315,6 @@ export default {
 
     // 根据设置sku属性值，生成笛卡儿积的sku列表
     updateSku(){
-
       //筛选出有效的sku属性值
       let skuAvailable = true;
       for (var attribute of this.skuAttribute){
@@ -351,6 +382,9 @@ export default {
     },
 
     async onSubmit() {
+      // console.log("useTimeRange:", this.form.useTimeRange);
+      // console.log("localtime", formatDate(this.form.useTimeRange[0]))
+      // return;
       let uploadFileList = this.uploadFiles.filter(s => {return s.file && s.file.trim()})
       this.form.images = uploadFileList.map(item=>{
         return {url:item.url,file:item.file}

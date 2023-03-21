@@ -46,7 +46,7 @@
               <el-input placeholder="请输入教练名字" style="width:280px;" v-model="form.name" clearable/>
           </el-form-item>
           <el-form-item label="头像(支持jpg/jpeg/png文件，且不超过250kb)">
-            <OssUploader v-bind:file="form.avatar" v-bind:url="form.avatarUrl" valueChanged="avatorChanged" > </OssUploader>
+            <OssUploader v-bind:file="form.avatar" v-bind:url="form.avatarUrl" @valueChanged="avatorChanged" > </OssUploader>
           </el-form-item>
           <el-form-item label="所属场馆">
             <el-select v-model="form.roomId" allow-create filterable  collapse-tags placeholder="请选择">
