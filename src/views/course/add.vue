@@ -227,7 +227,13 @@ export default {
 
       if (cateRes.success){
         this.skuAttribute = cateRes.data.skuAttributeList
-        this.goodAttribute = cateRes.data.goodAttributeList.filter(s => {return s.display})
+        // this.goodAttribute = cateRes.data.goodAttributeList.filter(s => {return s.display})
+        let goodAttribute = cateRes.data.goodAttributeList.filter(s => {return s.display})
+        this.goodAttribute = goodAttribute.map(item => {
+          let rItem = item
+          rItem['value'] = item.value
+          return rItem
+        })
         this.form.hasSku = this.skuAttribute.length > 0;
       }else{
         this.$message.error("类目信息请求失败:" + cateRes.errorMsg)
