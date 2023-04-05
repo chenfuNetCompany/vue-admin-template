@@ -130,6 +130,71 @@
         </el-table-column>
       </el-table>
     </el-form-item>
+
+  <!-- 团课预约信息 -->
+  <el-form-item label="团课课表" v-show="systemCourse">
+      <div class="group_wrap">
+        <div class="group_row"  v-for="(item, i) in groupCourseArr" :key="i">
+          <div class="group_row_item group_row_date">
+            <div>开始时间~结束时间</div>
+            <el-date-picker 
+              v-model="item.dates"
+              type="datetimerange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              @change="systemCourseDateChange(item)">
+            </el-date-picker>
+          </div>
+          <div class="group_row_item group_row_coach">
+            <div>选择教练</div>
+            <el-select
+              v-model="item.coachValue"
+              allow-create
+              filterable 
+              collapse-tags
+              default-first-option
+              @change="selectCoach(item)"
+              placeholder="请选择">
+              <el-option
+                v-for="row in coachOptions"
+                :key="row.value"
+                :label="row.label"
+                :value="row.value">
+              </el-option>
+            </el-select>
+          </div>
+          <div class="group_row_item group_row_room">
+            <div>选择场地</div>
+            <el-select
+              v-model="item.roomValue"
+              allow-create
+              filterable 
+              collapse-tags
+              default-first-option
+              @change="selectRoom(item)"
+              placeholder="请选择">
+              <el-option
+                v-for="row in roomOptions"
+                :key="row.value"
+                :label="row.label"
+                :value="row.value">
+              </el-option>
+            </el-select>
+          </div>
+          <div class="group_row_item group_row_opt">
+            <el-button type="primary" icon="el-icon-delete" @click="deleteSystemCourseRow(item, i)"></el-button>
+          </div>
+          <div class="group_row_item group_row_fail" :v-if="item.invalid">
+            <div>{{item.invalidText}}</div>
+          </div>
+        </div>
+        <div>
+          <el-button type="primary" icon="el-icon-plus" @click="addSystemCourseRow">新增一行</el-button>
+        </div>
+      </div>
+    </el-form-item>
+
     <el-form-item>
       <el-button type="primary" @click="onSubmit">{{isEdit ? "更新":"发布"}}</el-button>
     </el-form-item>
@@ -139,9 +204,13 @@
 
 <script>
 import { addGood, updateGood, getGoodCate, getGoodDetail } from '@/api/good'
+import { bookingSystemCourse } from '@/api/booking'
 import OssUploader from "@/components/OssUploader"
 import {validObj, validString} from "@/utils/validate"
 import {formatDate} from "@/utils/date"
+import { getRoomList } from '@/api/room'
+import { getCoachList } from '@/api/coach'
+import stringify from 'uuid/dist/stringify'
 
 
 export default {
@@ -179,10 +248,24 @@ export default {
       boolOptions:[
         {name:"是",value:true},
         {name:"否",value:false},
-      ]
+      ],
+      //团课预约信息
+      groupCourseArr: [],
+      coachList: [],
+      roomList: [],
+      coachOptions: [],
+      roomOptions: []
     }
   },
-  
+  computed: {
+    systemCourse() {
+      //团课判断
+      if (this.form.categoryId == 4) {
+        return true
+      }
+      return false
+    }
+  },
   created() {
     let params = this.$route.query;
     if (validObj(params) ){
@@ -227,18 +310,50 @@ export default {
 
       if (cateRes.success){
         this.skuAttribute = cateRes.data.skuAttributeList
-        // this.goodAttribute = cateRes.data.goodAttributeList.filter(s => {return s.display})
-        let goodAttribute = cateRes.data.goodAttributeList.filter(s => {return s.display})
-        this.goodAttribute = goodAttribute.map(item => {
-          let rItem = item
-          rItem['value'] = item.value
-          return rItem
-        })
+        this.goodAttribute = cateRes.data.goodAttributeList.filter(s => {return s.display})
+        // let goodAttribute = cateRes.data.goodAttributeList.filter(s => {return s.display})
+        // this.goodAttribute = goodAttribute.map(item => {
+        //   let rItem = item
+        //   rItem['value'] = item.value
+        //   return rItem
+        // })
         this.form.hasSku = this.skuAttribute.length > 0;
       }else{
         this.$message.error("类目信息请求失败:" + cateRes.errorMsg)
       }
 
+      if (this.systemCourse) {
+        //请求教练列表
+        let coachList = await getCoachList({
+          page: 1,
+          pageSize: 100,
+        }).catch(e => {
+          this.$message.error(e)
+        });
+        this.coachList = coachList.data.listData
+        this.coachOptions = this.coachList.map(item => {
+          let config = {
+            value: item.id,
+            label: item.name
+          }
+          return config
+        })
+        //请求场馆列表
+        let roomList = await getRoomList({
+          page: 1,
+          pageSize: 100,
+        }).catch(e => {
+          this.$message.error(e)
+        });
+        this.roomList = roomList.data.listData
+        this.roomOptions = this.roomList.map(item => {
+          let config = {
+            value: item.id,
+            label: item.name
+          }
+          return config
+        })
+      }
       if (this.isEdit){
         this.form.title = goodDetail.title;
         this.form.detail = goodDetail.detail;
@@ -271,7 +386,45 @@ export default {
           })
           this.skuList = this.skuList.slice(0)
         }
+      } else {
+        this.groupCourseArr.push({
+          startAt: null,
+          endAt: null,
+          coachId: null,
+          roomId: null,
+          dates: [],
+          invalid: false,
+          invalidText: null
+        })
       }
+    },
+    systemCourseDateChange(item) {
+      console.log("-------systemCourseDateChange----------")
+      if (Array.isArray(item.dates)) {
+        let startTime = formatDate(item.dates[0])
+        let endTime = formatDate(item.dates[1])
+        item.startAt = startTime
+        item.endAt = endTime
+      }
+      console.log(item)
+    },
+    addSystemCourseRow() {
+        this.groupCourseArr.push({
+          startAt: null,
+          endAt: null,
+          coachId: null,
+          roomId: null,
+          dates: []
+        })
+    },
+    deleteSystemCourseRow(item, index) {
+      this.groupCourseArr.splice(index, 1)
+    },
+    selectCoach(item) {
+      item.coachId = parseInt(item.coachValue)
+    },
+    selectRoom(item) {
+      item.roomId = parseInt(item.roomValue)
     },
 
     updateLocalSkuByGoodSku(goodSkuList, localSku){
@@ -401,6 +554,21 @@ export default {
         return {attrId:item.id,attrValue:JSON.stringify(item.value)}
       })
 
+      if (this.systemCourse) {
+        let invalid = false
+        for (const rowItem of this.groupCourseArr) {
+          if (rowItem.startAt == null || rowItem.endAt == null || rowItem.coachId == null || rowItem.roomId == null) {
+            invalid = true
+            rowItem.invalid = true
+            rowItem.invalidText = "输入不完整"
+          }
+        }
+        if (invalid) {
+          this.$message.error("输入有误")
+          return
+        }
+      }
+
       console.log("sumbit:", this.form);
       var res;
       if (this.isEdit){
@@ -410,16 +578,36 @@ export default {
       }
 
       if (res.success){
-        this.$message.success("发布成功")
         if (this.form.categoryId === 1){
+          this.$message.success("发布成功")
           this.$router.push({path:'/product/course'})
         }else if (this.form.categoryId === 2){
+          this.$message.success("发布成功")
           this.$router.push({path:'/product/ticket'})
         }else if (this.form.categoryId === 3){
+          this.$message.success("发布成功")
           this.$router.push({path:'/product/activity'})
+        } else if (this.form.categoryId === 4){
+          // this.$router.push({path:'product/group'})
+          console.log(res)
+          this.bookingSystemCourse(res.data);
         }
       }else{
         this.$message.error("发布失败:"+res.errorMsg)
+      }
+    },
+    async bookingSystemCourse(assetId) {
+      //发送预约请求
+      let params = {
+        assetId: assetId,
+        itemList: this.groupCourseArr
+      }
+      let result = await bookingSystemCourse(params)
+      if (result.success) {
+          this.$message.success("发布成功")
+          this.$router.push({path:'product/group'})
+      } else {
+        this.$message.error("发布失败:"+result.errorMsg)
       }
     },
 
@@ -447,6 +635,36 @@ width: 100px;
 .goodpicadd{
   display: flex;
   align-content:center;
+}
+
+.group_wrap {
+  display: flex;
+  flex-direction: column;
+}
+.group_row {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 10px;
+  padding-bottom: 3px;
+  border-bottom-width:0.5px;
+  border-bottom-style:solid;
+  border-bottom-color:gray;
+}
+.group_row_opt {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.group_row_fail {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: red;
+}
+.group_row_item {
+  display: flex;
+  flex-direction: column;
+  margin-right: 100px;
 }
 </style>
 

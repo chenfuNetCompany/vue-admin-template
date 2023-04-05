@@ -102,6 +102,12 @@ export const constantRoutes = [
         meta: { title: '课程管理', icon: 'table' }
       },
       {
+        path: 'group',
+        name: '团课管理',
+        component: () => import('@/views/course/index'),
+        meta: { title: '团课管理', icon: 'table' }
+      },
+      {
         path: 'ticket',
         name: '门票管理',
         component: () => import('@/views/course/index'),

@@ -8,3 +8,11 @@ export function getBookingList(params) {
     params
   })
 }
+
+export function bookingSystemCourse(data) {
+  return request({
+    url: '/booking/batchBook',
+    method: 'post',
+    data
+  })
+}

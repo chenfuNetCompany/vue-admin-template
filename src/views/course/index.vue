@@ -94,6 +94,8 @@ export default {
       this.params.cateId = 2;
     }else if (path === "/product/activity"){
       this.params.cateId = 3;
+    }else if (path === "/product/group"){
+      this.params.cateId = 4;
     }else{
       this.$message.error('页面路径错误')
       return;
