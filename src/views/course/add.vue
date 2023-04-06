@@ -143,7 +143,7 @@
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
-              :disabled="item.status != 0"
+              :disabled="item.disabled"
               @change="systemCourseDateChange(item)">
             </el-date-picker>
           </div>
@@ -155,7 +155,7 @@
               filterable 
               collapse-tags
               default-first-option
-              :disabled="item.status != 0"
+              :disabled="item.disabled"
               @change="selectRoom(item)"
               placeholder="请选择">
               <el-option
@@ -174,7 +174,7 @@
               filterable 
               collapse-tags
               default-first-option
-              :disabled="item.status != 0"
+              :disabled="item.disabled"
               @change="selectCoach(item)"
               placeholder="请选择">
               <el-option
@@ -185,8 +185,10 @@
               </el-option>
             </el-select>
           </div>
-          <div class="group_row_item group_row_opt">
-            <el-button :disabled="item.status != 0" type="primary" icon="el-icon-delete" @click="deleteSystemCourseRow(item, i)"></el-button>
+          <div class="group_row_opt">
+            <el-button v-if="!isEdit" type="primary" icon="el-icon-delete" @click="deleteSystemCourseRow(item, i)"></el-button>
+            <el-button v-if="isEdit" :disabled="item.disabled" type="primary" @click="editUpdateSystemCourseRow(item, i)">更新</el-button>
+            <el-button v-if="isEdit" :disabled="item.disabled" type="primary" @click="editDeleteSystemCourseRow(item, i)">删除</el-button>
           </div>
           <div class="group_row_item group_row_fail" :v-if="item.invalid">
             <div>{{item.invalidText}}</div>
@@ -207,13 +209,14 @@
 
 <script>
 import { addGood, updateGood, getGoodCate, getGoodDetail } from '@/api/good'
-import { bookingSystemCourse } from '@/api/booking'
+import { bookingSystemCourse, deleteBookingSystemCourse, updateBookingSystemCourse } from '@/api/booking'
 import OssUploader from "@/components/OssUploader"
 import {validObj, validString} from "@/utils/validate"
 import {formatDate} from "@/utils/date"
 import { getRoomList } from '@/api/room'
 import { getCoachList } from '@/api/coach'
 import stringify from 'uuid/dist/stringify'
+import nil from 'uuid/dist/nil'
 
 
 export default {
@@ -368,7 +371,7 @@ export default {
         this.roomList = roomList.data.listData
         this.roomOptions = this.roomList.map(item => {
           let config = {
-            value: item.id,
+            value: item.id.toString(),
             name: item.name
           }
           return config
@@ -378,50 +381,46 @@ export default {
           let groupList = bookingList.map(item => {
             let roomOptions = item.roomOptions.map(obj => {
               return {
-                value: obj.id,
+                value: obj.id.toString(),
                 name: obj.name
               }
             })
             let coachOptions = item.coachOptions.map(obj => {
               return {
-                value: obj.id,
+                value: obj.id.toString(),
                 name: obj.name
               }
             })
-            let rItem = {
-              startAt: item.startAt,
-              endAt: item.endAt,
-              coachId: item.coachId,
-              roomId: item.roomId,
-              dates: [item.startAt, item.endAt],
-              invalid: false,
-              invalidText: null,
-              coachOptions: coachOptions,
-              roomOptions: roomOptions,
-              coachValue: item.coachId,
-              roomValue: item.roomId,
-            }
-            rItem.status = item.status
+            let rItem = this.localItemWithBooking(item, roomOptions, coachOptions);
             return rItem
           })
+          console.log(groupList)
           if (groupList && groupList.length > 0) {
             this.groupCourseArr = groupList
           }
         } else {
-          this.groupCourseArr.push({
-            startAt: null,
-            endAt: null,
-            coachId: null,
-            roomId: null,
-            dates: [],
-            invalid: false,
-            invalidText: null,
-            coachOptions: [],
-            coachValue: null,
-            roomValue: null,
-          })
+          this.groupCourseArr.push(this.newSystemCourseItem())
         }
       }
+    },
+    localItemWithBooking(item, roomOptions, coachOptions) {
+      let rItem = {
+        id: item.id,
+        startAt: item.startAt,
+        endAt: item.endAt,
+        coachId: item.coachId,
+        roomId: item.roomId,
+        dates: [item.startAt, item.endAt],
+        invalid: false,
+        invalidText: null,
+        coachOptions: coachOptions?coachOptions:null,
+        roomOptions: roomOptions?roomOptions:null,
+        coachValue: item.coachId.toString(),
+        roomValue: item.roomId.toString()
+      }
+      rItem.status = item.status
+      rItem.disabled = Boolean(item.status && item.status != 0)
+      return rItem
     },
     systemCourseDateChange(item) {
       console.log("-------systemCourseDateChange----------")
@@ -434,16 +433,76 @@ export default {
       console.log(item)
     },
     addSystemCourseRow() {
-        this.groupCourseArr.push({
-          startAt: null,
-          endAt: null,
-          coachId: null,
-          roomId: null,
-          dates: []
-        })
+        this.groupCourseArr.push(this.newSystemCourseItem())
+    },
+    newSystemCourseItem() {
+      return {
+        startAt: null,
+        endAt: null,
+        coachId: null,
+        roomId: null,
+        dates: [],
+        invalid: false,
+        invalidText: null,
+        coachOptions: [],
+        coachValue: null,
+        roomValue: null,
+      }
     },
     deleteSystemCourseRow(item, index) {
       this.groupCourseArr.splice(index, 1)
+    },
+    //编辑模式-修改/新增
+    async editUpdateSystemCourseRow(item, index) {
+      console.log("-------editUpdateSystemCourseRow----------")
+      console.log(item);
+      let result = nil;
+      if (item.id) {
+        result = await updateBookingSystemCourse(item).catch(e => {
+          this.$message.error(e)
+        });
+      } else {
+        let params = {
+          assetId: this.form.id,
+          itemList: [item]
+        }
+        result = await bookingSystemCourse(params)
+        if (result.success && result.data.length > 0) {
+            let rItem = this.localItemWithBooking(result.data[0], null, null);
+            this.groupCourseArr.splice(index, 1, rItem)
+        }
+      }
+      if (result.success) {
+        item.invalid = false
+        this.$message.success("更新成功")
+      } else {
+        item.invalid = true
+        item.invalidText = "更新失败"
+        this.$message.error("更新失败")
+      }
+    },
+    //编辑模式-删除
+    async editDeleteSystemCourseRow(item, index) {
+      console.log("-------editDeleteSystemCourseRow----------")
+      console.log(item);
+      if (!item.id) {
+        this.deleteSystemCourseRow(item, index)
+        return
+      }
+      let result = await deleteBookingSystemCourse({
+        id: parseInt(item.id)
+      }).catch(e => {
+        this.$message.error(e)
+      });
+      if (result.success) {
+        item.invalid = false
+        this.groupCourseArr.splice(index, 1)
+        this.$message.success("删除成功")
+      } else {
+        item.invalid = true
+        item.invalidText = "删除失败"
+        this.$message.error("删除失败")
+      }
     },
     selectCoach(item) {
       item.coachId = parseInt(item.coachValue)
@@ -467,7 +526,7 @@ export default {
       let coachList = result.data.listData
       let coachOptions = coachList.map(obj => {
         let config = {
-          value: obj.id,
+          value: obj.id.toString(),
           name: obj.name
         }
         return config
@@ -627,18 +686,18 @@ export default {
       }
 
       if (res.success){
+        this.$message.success("发布成功")
         if (this.form.categoryId === 1){
-          this.$message.success("发布成功")
           this.$router.push({path:'/product/course'})
         }else if (this.form.categoryId === 2){
-          this.$message.success("发布成功")
           this.$router.push({path:'/product/ticket'})
         }else if (this.form.categoryId === 3){
-          this.$message.success("发布成功")
           this.$router.push({path:'/product/activity'})
         } else if (this.form.categoryId === 4){
           // this.$router.push({path:'product/group'})
-          this.bookingSystemCourse(this.isEdit?this.form.id:res.data);
+          if (!this.isEdit) {
+            this.bookingSystemCourse(res.data);
+          }
         }
       }else{
         this.$message.error("发布失败:"+res.errorMsg)
@@ -701,8 +760,9 @@ width: 100px;
 }
 .group_row_opt {
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  flex-direction: row;
+  align-items: flex-end;
+  margin-right: 100px;
 }
 .group_row_fail {
   display: flex;

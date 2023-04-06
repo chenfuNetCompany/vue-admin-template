@@ -16,3 +16,19 @@ export function bookingSystemCourse(data) {
     data
   })
 }
+
+export function deleteBookingSystemCourse(data) {
+  return request({
+    url: '/booking/deleteBook',
+    method: 'post',
+    data
+  })
+}
+
+export function updateBookingSystemCourse(data) {
+  return request({
+    url: '/booking/updateBook',
+    method: 'post',
+    data
+  })
+}
