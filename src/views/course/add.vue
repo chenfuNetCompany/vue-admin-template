@@ -442,7 +442,7 @@ export default {
         coachId: null,
         roomId: null,
         dates: [],
-        invalid: false,
+        invalid: true,
         invalidText: null,
         coachOptions: [],
         coachValue: null,
@@ -456,23 +456,15 @@ export default {
     async editUpdateSystemCourseRow(item, index) {
       console.log("-------editUpdateSystemCourseRow----------")
       console.log(item);
-      let result = nil;
-      if (item.id) {
-        result = await updateBookingSystemCourse(item).catch(e => {
-          this.$message.error(e)
-        });
-      } else {
-        let params = {
-          assetId: this.form.id,
-          itemList: [item]
-        }
-        result = await bookingSystemCourse(params)
-        if (result.success && result.data.length > 0) {
-            let rItem = this.localItemWithBooking(result.data[0], null, null);
-            this.groupCourseArr.splice(index, 1, rItem)
-        }
-      }
+      item["assetId"] = this.form.id
+      let result = await updateBookingSystemCourse(item).catch(e => {
+        this.$message.error(e)
+      });
       if (result.success) {
+        if (result.data.length > 0) {
+          let rItem = this.localItemWithBooking(result.data[0], null, null);
+          this.groupCourseArr.splice(index, 1, rItem)
+        }
         item.invalid = false
         this.$message.success("更新成功")
       } else {
@@ -665,6 +657,11 @@ export default {
       if (this.systemCourse) {
         let invalid = false
         for (const rowItem of this.groupCourseArr) {
+          if (rowItem.invalid && !rowItem.id) {
+            rowItem.invalidText = "未发布成功"
+            invalid = true
+            continue
+          }
           if (rowItem.startAt == null || rowItem.endAt == null || rowItem.coachId == null || rowItem.roomId == null) {
             invalid = true
             rowItem.invalid = true
