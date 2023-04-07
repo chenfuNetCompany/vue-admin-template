@@ -187,7 +187,7 @@
           </div>
           <div class="group_row_opt">
             <el-button v-if="!isEdit" type="primary" icon="el-icon-delete" @click="deleteSystemCourseRow(item, i)"></el-button>
-            <el-button v-if="isEdit" :disabled="item.disabled" type="primary" @click="editUpdateSystemCourseRow(item, i)">更新</el-button>
+            <el-button v-if="isEdit" :disabled="item.disabled" type="primary" @click="editUpdateSystemCourseRow(item, i)">{{item.id?"更新":"新增"}}</el-button>
             <el-button v-if="isEdit" :disabled="item.disabled" type="primary" @click="editDeleteSystemCourseRow(item, i)">删除</el-button>
           </div>
           <div class="group_row_item group_row_fail" :v-if="item.invalid">
@@ -461,9 +461,13 @@ export default {
         this.$message.error(e)
       });
       if (result.success) {
-        if (result.data.length > 0) {
-          let rItem = this.localItemWithBooking(result.data[0], null, null);
-          this.groupCourseArr.splice(index, 1, rItem)
+        if (result.data) {
+          let rItem = this.localItemWithBooking(result.data, null, null);
+          console.log(rItem)
+          let resItem = Object.assign({}, item)
+          resItem.id = rItem.id
+          console.log(resItem)
+          this.groupCourseArr.splice(index, 1, resItem)
         }
         item.invalid = false
         this.$message.success("更新成功")
