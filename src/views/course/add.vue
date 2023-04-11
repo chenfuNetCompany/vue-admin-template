@@ -661,7 +661,7 @@ export default {
       if (this.systemCourse) {
         let invalid = false
         for (const rowItem of this.groupCourseArr) {
-          if (rowItem.invalid && !rowItem.id) {
+          if (rowItem.invalid && !rowItem.id && this.isEdit) {
             rowItem.invalidText = "未发布成功"
             invalid = true
             continue
