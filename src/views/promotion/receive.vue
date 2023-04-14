@@ -33,6 +33,7 @@
         <el-table-column width="120" label="用户手机" prop="userMobile"></el-table-column>
         <el-table-column width="120" label="状态" prop="statusText"></el-table-column>
         <el-table-column width="180" label="获取时间" prop="createTime"></el-table-column>
+        <el-table-column width="180" label="到期时间" prop="expireTime"></el-table-column>
       </el-table>
       <el-pagination
         @size-change="handleSizeChange"

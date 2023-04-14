@@ -15,6 +15,7 @@
         <el-table-column width="120" label="总数" prop="totalCount"></el-table-column>
         <el-table-column width="120" label="领取数量" prop="receiveCount"></el-table-column>
         <el-table-column width="120" label="使用数量" prop="usedCount"></el-table-column>
+        <el-table-column width="180" label="到期时间" prop="expireTime"></el-table-column>
         <el-table-column width="180" label="创建时间" prop="createTime"></el-table-column>
         <el-table-column label="操作" width="130px">
           <template slot-scope="scope">
@@ -52,6 +53,12 @@
         <el-form :model="form" text-align="left" label-position="top">
           <el-form-item label="标题"><el-input v-model="form.name"/></el-form-item>
           <el-form-item label="金额"><el-input v-model="form.val"/></el-form-item>
+          <el-form-item label="到期时间">
+            <el-date-picker 
+              v-model="form.date"
+              type="datetime">
+            </el-date-picker>
+          </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogAddVisible = false">取 消</el-button>
@@ -63,6 +70,8 @@
   
   <script>
   import { promotionlist , distCoupon, addCoupon } from '@/api/promotion'
+  import {formatDate} from "@/utils/date"
+  import {validObj} from "@/utils/validate"
   
   export default {
     // filters: {
@@ -93,6 +102,8 @@
         form: {
           name: '',
           val: '',
+          date:null,
+          expireTime:null,
         }
       }
     },
@@ -130,6 +141,13 @@
       },
 
       async addPromiton() {
+        if (validObj(this.form.date)){
+          this.form.expireTime = formatDate(this.form.date)
+        }else{
+          this.$message.error("缺少到期日")
+          return;
+        }
+
         const res = await addCoupon(this.form);
         this.dialogAddVisible = false;
 
