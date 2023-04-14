@@ -56,19 +56,15 @@
       </div>
     </el-form-item>
 
-    <!-- <el-form-item label="开售时间">
+    <el-form-item label="活动时间" v-show="form.categoryId==3">
       <el-date-picker 
-        v-model="form.useTimeRange"
+        v-model="form.dates"
         type="datetimerange"
         range-separator="至"
         start-placeholder="开始日期"
         end-placeholder="结束日期">
       </el-date-picker>
     </el-form-item>
-
-    <el-form-item label="使用时间">
-      
-    </el-form-item> -->
 
 
     <el-form-item label="销售属性" v-show="skuAttribute.length > 0">
@@ -242,6 +238,7 @@ export default {
         useStartAt:null,
         useEndAt:null,
         useTimeRange:null,
+        dates:[],
       },
       uploadFiles:[
       ],
@@ -657,6 +654,13 @@ export default {
       this.form.specList = this.goodAttribute.map(item=>{
         return {attrId:item.id,attrValue:JSON.stringify(item.value)}
       })
+
+      if (Array.isArray(this.form.dates)) {
+        let startTime = formatDate(this.form.dates[0])
+        let endTime = formatDate(this.form.dates[1])
+        this.form.useStartAt = startTime
+        this.form.useEndAt = endTime
+      }
 
       if (this.systemCourse) {
         let invalid = false
