@@ -655,7 +655,7 @@ export default {
         return {attrId:item.id,attrValue:JSON.stringify(item.value)}
       })
 
-      if (Array.isArray(this.form.dates)) {
+      if (this.form.categoryId == 3 && Array.isArray(this.form.dates)) {
         let startTime = formatDate(this.form.dates[0])
         let endTime = formatDate(this.form.dates[1])
         this.form.useStartAt = startTime
