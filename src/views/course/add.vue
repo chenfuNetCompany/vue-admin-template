@@ -183,7 +183,7 @@
           </div>
           <div class="group_row_opt">
             <el-button v-if="!isEdit" type="primary" icon="el-icon-delete" @click="deleteSystemCourseRow(item, i)"></el-button>
-            <el-button v-if="isEdit" :disabled="item.disabled" type="primary" @click="editUpdateSystemCourseRow(item, i)">{{item.id?"更新":"新增"}}</el-button>
+            <el-button v-if="isEdit" :disabled="item.disabled" type="primary" @click="editUpdateSystemCourseRow(item, i)">{{item.id?"更新":"保存"}}</el-button>
             <el-button v-if="isEdit" :disabled="item.disabled" type="primary" @click="editDeleteSystemCourseRow(item, i)">删除</el-button>
           </div>
           <div class="group_row_item group_row_fail" :v-if="item.invalid">
