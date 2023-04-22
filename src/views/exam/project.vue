@@ -27,12 +27,12 @@
 
     <!-- 编辑列表 -->
     <el-dialog :show-close="false"
-        title="编辑模板"
+        :title="dialogTitle"
         :visible.sync="projectEditDialogVisible"
         width="50%">
         <!-- 内层对话框 -->
         <el-dialog title="类目选择" :visible.sync="innerDialogVisible" width="30%" append-to-body>
-            <el-tree :data="cate_show_tree" :props="defaultProps" accordion @node-click="handleNodeClick"></el-tree>
+            <el-tree :props="defaultProps" :load="loadNode1" ref="tree" show-checkbox lazy></el-tree>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="innerDialogVisible = false">取 消</el-button>
                 <el-button type="primary" @click="innerDialogSubmit">确 定</el-button>
@@ -60,7 +60,7 @@
           </el-table-column>
         </el-table>
         <div style="margin-top: 20px;">
-          <el-button type="primary" size="mini" @click="addCateSubject">新增一条</el-button>
+          <el-button type="primary" size="mini" @click="addCateSubject">新增</el-button>
         </div>
         
         <span slot="footer" class="dialog-footer">
@@ -81,23 +81,23 @@ export default {
       listLoading: false,
       projectData: null,
       projectList:[],
+      dialogTitle: "编辑模板",
+      newProject: false,//是否新建
       //编辑
       project_name: null,
       projectEditDialogVisible: false,
       editRowList: [],
       //树
       innerDialogVisible: false,
-      cate_show_tree: [],
       defaultProps: {
-          children: 'childCategoryList',
+          children: 'indexList',
           label: 'name'
       },
-
+      editChanged: false
     }
   },
   created() {
     this.fetchData()
-    this.fetchCateInfo()
   },
   methods: {
     fetchData() {
@@ -124,20 +124,28 @@ export default {
       )
     },
     addProject() {
-
+      this.newProject = true
+      this.dialogTitle = "新建模板"
+      this.editRowList = []
+      this.projectEditDialogVisible = true
     },
     //编辑
     editProject(row) {
+      this.newProject = false
+      this.dialogTitle = "编辑模板"
       let rowList = []
       row.list.filter(item => {
-        rowList.push(item)
+        let rItem = item
+        rItem["keys"] = item.cateName+","+item.subjectName+","+item.indexName
+        rItem["ids"] = item.examCateId+","+item.examSubjectId+","+item.examItemId
+        rowList.push(rItem)
         return true
       })
       this.editRowList = rowList
       this.projectEditDialogVisible = true
     },
     addCateSubject() {
-
+      this.innerDialogVisible = true
     },
     deleteCate(row) {
       let index = this.editRowList.indexOf(row)
@@ -148,25 +156,123 @@ export default {
     outerDialogCancel() {
       this.projectEditDialogVisible = false
     },
-    outerDialogSubmit() {
-      this.projectEditDialogVisible = false
-    },
-    //树
-    handleNodeClick() {
-
-    },
-    innerDialogSubmit() {
-
-    },
-    //数据请求
-    async fetchCateInfo() {
-      let result = await getCateList().catch(e=>{
-        this.$message.error(e)
-      })
+    async outerDialogSubmit() {
+      if (this.project_name == this.projectData.name && !this.editChanged) {
+        this.$message.success("无变更")
+        return
+      }
+      let body = {
+        name: this.project_name,
+        examItems: this.editRowList
+      }
+      if (!this.newProject) {
+        body["id"] = this.projectData.id
+      }
+      console.log("submit------")
+      console.log(body)
+      let result = null
+      if (this.newProject) {
+        result = await addProject(body).catch(e=>{
+            this.$message.error(e)
+        })
+      } else {
+        result = await updateProject(body).catch(e=>{
+            this.$message.error(e)
+        })
+      }
       if (result.success) {
         result = result.data
-        console.log(result)
+        if (result) {
+          this.$message.success("提交成功")
+          this.fetchData()
+          this.projectEditDialogVisible = false
+        } else {
+          this.$message.error("提交失败")
+        }
+      } else {
+        this.$message.error("提交失败")
       }
+    },
+    //树
+    loadNode1(node, resolve) {
+      if (node.level == 0) {
+        getCateList().then(response => {
+          let listData = response.data
+          if (listData.length > 0) {
+            let cateList = listData.map(item => {
+              let rItem = item
+              rItem["keys"] = item.name
+              rItem["ids"] = item.id
+              return rItem
+            })
+            return resolve(cateList);
+          } else {
+            return resolve([])
+          }
+        }).catch(e=>{
+          return resolve([])
+        })
+      } else if (node.level == 1) {
+        getSubjectList({
+          cateId: node.data.id,
+          page: 1,
+          pageSize: 100
+        }).then(response => {
+          let listData = response.data.listData
+          listData = listData.map(item => {
+            let rItem = item
+            rItem["keys"] = node.data.keys+","+item.name
+            rItem["ids"] = node.data.ids+","+item.id
+            return rItem
+          })
+          return resolve(listData);
+        }).catch(e=>{
+          return resolve([])
+        })
+      } else {
+        if (node.data.indexList && node.data.indexList.length > 0) {
+          let listData = node.data.indexList.map(item =>{
+            let rItem = item
+            rItem["keys"] = node.data.keys+","+item.name
+            rItem["ids"] = node.data.ids+","+item.id
+            rItem["leaf"] = true
+            return rItem
+          })
+          return resolve(listData)
+        } else {
+          return resolve([])
+        }
+      }
+    },
+    innerDialogSubmit() {
+      let nodes = this.$refs.tree.getCheckedNodes(true)
+      for (const node of nodes) {
+        if(!this.findNodeInEditRowList(node)) {
+          this.editChanged = true
+          let keysArr = node.keys.split(",");
+          let idsArr = node.ids.split(",");
+          let obj = {
+            examCateId: idsArr[0],
+            examSubjectId: idsArr[1],
+            examItemId: idsArr[2],
+            cateName: keysArr[0],
+            subjectName: keysArr[1],
+            indexName: keysArr[2]
+          }
+          let res = Object.assign(obj, node)
+          this.editRowList.push(obj)
+        }
+      }
+      this.innerDialogVisible = false
+    },
+    findNodeInEditRowList(node) {
+      let obj = this.editRowList.find(obj => {
+          return (obj.keys == node.keys)
+      })
+      if (obj) {
+        return true
+      }
+      return false
     }
   }
 }
