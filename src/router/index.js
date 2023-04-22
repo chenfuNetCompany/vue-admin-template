@@ -194,6 +194,12 @@ export const constantRoutes = [
     meta: { title: '体测管理', icon: 'el-icon-s-help' },
     children: [
       {
+        path: 'project',
+        name: '模板管理',
+        component: () => import('@/views/exam/project'),
+        meta: { title: '模板管理', icon: 'table' }
+      },
+      {
         path: 'subject',
         name: '项目管理',
         component: () => import('@/views/exam/subject'),

@@ -56,3 +56,29 @@ export function getRecordList(params) {
     params
   })
 }
+
+//获取测试模板列表
+export function getProjectList() {
+  return request({
+    url: '/exam/project/one',
+    method: 'get'
+  })
+}
+
+//添加测试模板
+export function addProject(data) {
+  return request({
+    url: '/exam/project/add',
+    method: 'post',
+    data
+  })
+}
+
+//更新测试工程
+export function updateProject(data) {
+  return request({
+    url: '/exam/project/update',
+    method: 'post',
+    data
+  })
+}
