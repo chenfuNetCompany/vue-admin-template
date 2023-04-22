@@ -457,7 +457,7 @@ export default {
       let result = await updateBookingSystemCourse(item).catch(e => {
         this.$message.error(e)
       });
-      if (result.success) {
+      if (result && result.success) {
         if (result.data) {
           let rItem = this.localItemWithBooking(result.data, null, null);
           console.log(rItem)
@@ -467,6 +467,7 @@ export default {
           this.groupCourseArr.splice(index, 1, resItem)
         }
         item.invalid = false
+        item.invalidText = ""
         this.$message.success("更新成功")
       } else {
         item.invalid = true
@@ -702,6 +703,7 @@ export default {
           // this.$router.push({path:'product/group'})
           if (!this.isEdit) {
             this.bookingSystemCourse(res.data);
+            this.$router.push({path:'/product/group'})
           }
         }
       }else{
@@ -718,7 +720,6 @@ export default {
       let result = await bookingSystemCourse(params)
       if (result.success) {
           this.$message.success("发布成功")
-          this.$router.push({path:'/product/group'})
       } else {
         this.$message.error("发布失败:"+result.errorMsg)
       }
