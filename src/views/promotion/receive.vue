@@ -68,7 +68,7 @@
         statuOptions:[
           {value:1,label:'未使用'},
           {value:2,label:'已使用'},
-          {value:3,label:'已过期'}
+          {value:-1,label:'已过期'}
         ],
         list: null,
         listLoading: true,
