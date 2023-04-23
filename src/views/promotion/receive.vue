@@ -103,10 +103,13 @@
       },
 
       statusFilter(status) {
+        if (status == -1){
+          return '已过期';
+        }
+        
         const statusMap = {
           1: '未使用',
           2: '已使用',
-          3: '已过期',
         }
         return statusMap[status]
       }
