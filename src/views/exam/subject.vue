@@ -5,13 +5,14 @@
       <!------------------------------ 测试类目区域 ------------------------------->
       <el-col :span="8">
         <el-button type="primary" @click="clickAddCate">添加类目</el-button>
-        <el-table :data="cateList" border fit highlight-current-row @current-change="onCateChange">
+        <el-table :data="cateList" border fit highlight-current-row>
           <el-table-column label="类目ID" width="100" prop="id"></el-table-column>
           <el-table-column label="类目名称" width="100" prop="name"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyid(scope.row.id)" >编辑</el-button>
-              <el-button type="text" icon="el-icon-delete" size="mini" @click="removebyid(scope.row.id)">删除</el-button>
+              <el-button type="text" icon="el-icon-edit" size="mini" @click="detailCateRow(scope.row, 0)" >详情</el-button>
+              <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyRow(scope.row, 0)" >编辑</el-button>
+              <el-button type="text" icon="el-icon-delete" size="mini" @click="removebyid(scope.row.id, 0)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -27,8 +28,8 @@
           <el-table-column label="项目创建人" width="120" prop="creator"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyid(scope.row.id)" >编辑</el-button>
-              <el-button type="text" icon="el-icon-delete" size="mini" @click="removebyid(scope.row.id)">删除</el-button>
+              <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyRow(scope.row, 1)" >编辑</el-button>
+              <el-button type="text" icon="el-icon-delete" size="mini" @click="removebyid(scope.row.id, 1)">删除</el-button>
               <el-button type="text" icon="el-icon-delete" size="mini" @click="clickAddIndex(scope.row.id)">添加指标</el-button>
             </template>
           </el-table-column>
@@ -40,8 +41,8 @@
                 <el-table-column label="指标创建人" width="100" prop="creator"></el-table-column>
                 <el-table-column label="操作">
                   <template slot-scope="scope">
-                    <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyid(scope.row.id)" >编辑</el-button>
-                    <el-button type="text" icon="el-icon-delete" size="mini" @click="removebyid(scope.row.id)">删除</el-button>
+                    <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyRow(scope.row, 2)" >编辑</el-button>
+                    <el-button type="text" icon="el-icon-delete" size="mini" @click="removebyid(scope.row.id, 2)">删除</el-button>
                   </template>
                 </el-table-column>
               </el-table>
@@ -101,11 +102,25 @@
       </div>
     </el-dialog>
 
+    <!-- 编辑-->
+    <el-dialog :title='editConfig.title' :show-close="false" :close-on-click-modal="false" :visible.sync="editConfig.editDialogVisible" width="500px">
+      <el-form :model="editConfig.editForm">
+          <el-form-item label="名称" label-width="200">
+              <el-input placeholder="" style="width:280px;" v-model="editConfig.editForm.name"/>
+          </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+          <el-button @click="editConfig.editDialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="editDialogSubmit()">确 定</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
 import { addSubject, getSubjectList, addIndex, getIndexList, addCate, getCateList} from '@/api/exam'
+import { deleteIndex, deleteSubject, deleteCate, updateIndex, updateSubject, updateCate } from '@/api/exam'
 
 export default {
   filters: {
@@ -148,6 +163,16 @@ export default {
         label: 'name'
       },
       total:0,
+      //编辑
+      editConfig: {
+        title: "修改类目",
+        editDialogVisible: false,
+        editForm: {
+          name: ""
+        },
+        type: 0,
+        rowData: null
+      }
     }
   },
   created() {
@@ -165,12 +190,12 @@ export default {
       }
     },
 
-    onCateChange(node){
-      console.log(node)
-      this.params.cateId = node.id;
-      this.params.cateName = node.name;
-      this.fetchSubjectData();
-    },
+    // onCateChange(node){
+    //   console.log(node)
+    //   this.params.cateId = node.id;
+    //   this.params.cateName = node.name;
+    //   this.fetchSubjectData();
+    // },
 
     clickAddCate(){
       this.cateForm = {};
@@ -238,6 +263,73 @@ export default {
         this.fetchSubjectData();
       })
     },
+    //操作
+    removebyid(id, type) {
+      if (type == 2) {
+        deleteIndex({
+          id: id
+        }).then(response =>{
+          this.$message.success('删除成功')
+          this.fetchSubjectData();
+        })
+      } else if (type == 1) {
+        deleteSubject({
+          id: id
+        }).then(response =>{
+          this.$message.success('删除成功')
+          this.fetchSubjectData();
+        })
+      } else {
+        deleteCate({
+          id: id
+        }).then(response =>{
+          this.$message.success('删除成功')
+          this.fetchCateData();
+          this.subjectList = []
+        })
+      }
+    },
+    editbyRow(row, type) {
+      if (type == 2) {
+        this.editConfig.title = "修改指标"
+      } else if (type == 1) {
+        this.editConfig.title = "修改项目"
+      } else {
+        this.editConfig.title = "修改类目"
+      }
+      this.editConfig.editDialogVisible = true
+      this.editConfig.editForm.name = row.name
+      this.editConfig.type = type
+      this.editConfig.rowData = row
+    },
+    editDialogSubmit() {
+      let type = this.editConfig.type
+      this.editConfig.rowData.name = this.editConfig.editForm.name
+      if (type == 2) {
+        updateIndex(this.editConfig.rowData).then(response =>{
+          this.$message.success('修改成功')
+          this.editConfig.editDialogVisible = false
+          this.fetchSubjectData();
+        })
+      } else if (type == 1) {
+        updateSubject(this.editConfig.rowData).then(response =>{
+          this.$message.success('修改成功')
+          this.editConfig.editDialogVisible = false
+          this.fetchSubjectData();
+        })
+      } else {
+        updateCate(this.editConfig.rowData).then(response =>{
+          this.$message.success('修改成功')
+          this.editConfig.editDialogVisible = false
+          this.fetchCateData();
+        })
+      }
+    },
+    detailCateRow(row, type) {
+      this.params.cateId = row.id;
+      this.params.cateName = row.name;
+      this.fetchSubjectData();
+    }
   }
 }
 </script>

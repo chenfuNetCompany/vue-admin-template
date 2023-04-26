@@ -82,3 +82,57 @@ export function updateProject(data) {
     data
   })
 }
+
+//删除测试指标
+export function deleteIndex(data) {
+  return request({
+    url: '/exam/index/delete',
+    method: 'post',
+    data
+  })
+}
+
+//删除测试项目
+export function deleteSubject(data) {
+  return request({
+    url: '/exam/subject/delete',
+    method: 'post',
+    data
+  })
+}
+
+//删除测试类目
+export function deleteCate(data) {
+  return request({
+    url: '/exam/cate/delete',
+    method: 'post',
+    data
+  })
+}
+
+//更新测试指标
+export function updateIndex(data) {
+  return request({
+    url: '/exam/index/update',
+    method: 'post',
+    data
+  })
+}
+
+//更新测试项目
+export function updateSubject(data) {
+  return request({
+    url: '/exam/subject/update',
+    method: 'post',
+    data
+  })
+}
+
+//更新测试类目
+export function updateCate(data) {
+  return request({
+    url: '/exam/cate/update',
+    method: 'post',
+    data
+  })
+}

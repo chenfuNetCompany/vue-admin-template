@@ -91,7 +91,8 @@ export default {
       innerDialogVisible: false,
       defaultProps: {
           children: 'indexList',
-          label: 'name'
+          label: 'name',
+          isLeaf: 'leaf'
       },
       editChanged: false
     }
