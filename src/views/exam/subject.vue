@@ -10,8 +10,8 @@
           <el-table-column label="类目名称" width="100" prop="name"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-button type="text" icon="el-icon-edit" size="mini" @click="detailCateRow(scope.row, 0)" >详情</el-button>
-              <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyRow(scope.row, 0)" >编辑</el-button>
+              <el-button type="text" icon="el-icon-edit" size="mini" @click="detailCateRow(scope.row, 0)" >项目编辑</el-button>
+              <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyRow(scope.row, 0)" >修改</el-button>
               <el-button type="text" icon="el-icon-delete" size="mini" @click="removebyid(scope.row.id, 0)">删除</el-button>
             </template>
           </el-table-column>
@@ -28,7 +28,7 @@
           <el-table-column label="项目创建人" width="120" prop="creator"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyRow(scope.row, 1)" >编辑</el-button>
+              <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyRow(scope.row, 1)" >修改</el-button>
               <el-button type="text" icon="el-icon-delete" size="mini" @click="removebyid(scope.row.id, 1)">删除</el-button>
               <el-button type="text" icon="el-icon-delete" size="mini" @click="clickAddIndex(scope.row.id)">添加指标</el-button>
             </template>
@@ -41,7 +41,7 @@
                 <el-table-column label="指标创建人" width="100" prop="creator"></el-table-column>
                 <el-table-column label="操作">
                   <template slot-scope="scope">
-                    <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyRow(scope.row, 2)" >编辑</el-button>
+                    <el-button type="text" icon="el-icon-edit" size="mini" @click="editbyRow(scope.row, 2)" >修改</el-button>
                     <el-button type="text" icon="el-icon-delete" size="mini" @click="removebyid(scope.row.id, 2)">删除</el-button>
                   </template>
                 </el-table-column>
