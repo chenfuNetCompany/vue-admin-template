@@ -24,6 +24,7 @@
 <script>
 
 import { getRoleList, addAccount } from '@/api/account'
+import md5 from 'js-md5'
 
 export default {
   data() {
@@ -113,6 +114,7 @@ export default {
       this.$refs[formName].validate((valid) => {
         console.log('validate')
         if (valid) {
+          this.ruleForm.password = md5(this.ruleForm.password)
           addAccount(this.ruleForm).then(response => {
             console.log(JSON.stringify(response))
             if (response.success){
