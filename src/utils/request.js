@@ -15,7 +15,7 @@ service.interceptors.request.use(
   config => {
     // do something before request is sent
     let wHost = window.document.location.host
-    config.headers['hostFlag'] = wHost
+    config.headers['Hostflag'] = wHost
     
     if (store.getters.token) {
       // let each request carry token
