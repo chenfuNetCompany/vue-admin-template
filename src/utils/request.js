@@ -14,7 +14,10 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // do something before request is sent
-    let wHost = window.document.location.host
+    let wHost = process.env.VUE_APP_HOST_FLAG
+    if (!wHost) {
+      wHost = window.document.location.host
+    }
     config.headers['Hostflag'] = wHost
     
     if (store.getters.token) {
