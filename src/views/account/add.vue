@@ -47,6 +47,8 @@ export default {
     var validatePass = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请输入密码'))
+      } else if (value.length < 6) {
+        callback(new Error('密码长度最短6位'))
       } else {
         if (this.ruleForm.checkPass !== '') {
           this.$refs.ruleForm.validateField('checkPass')
@@ -115,6 +117,7 @@ export default {
         console.log('validate')
         if (valid) {
           this.ruleForm.password = md5(this.ruleForm.password)
+          console.log('rjl'+JSON.stringify(this.ruleForm))
           addAccount(this.ruleForm).then(response => {
             console.log(JSON.stringify(response))
             if (response.success){

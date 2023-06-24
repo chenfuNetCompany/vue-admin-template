@@ -16,12 +16,30 @@
               首页
             </el-dropdown-item>
           </router-link>
+          <el-dropdown-item divided @click.native="showDialog">
+            <span style="display:block;">修改密码</span>
+          </el-dropdown-item>
           <el-dropdown-item divided @click.native="logout">
             <span style="display:block;">退出登录</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
+
     </div>
+    <el-dialog title="修改密码" :visible.sync="dialogAddVisible" width="500px" >
+      <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+        <el-form-item label="密码" prop="password">
+          <el-input type="password" v-model="ruleForm.password" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="确认密码" prop="checkPass">
+          <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogAddVisible = false">取 消</el-button>
+        <el-button type="primary" @click="changePassword('ruleForm')">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -29,6 +47,9 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
+import md5 from "js-md5";
+import {getAccountList, updateAccount} from "@/api/account";
+import store from "@/store";
 
 export default {
   components: {
@@ -41,9 +62,91 @@ export default {
       'avatar'
     ])
   },
+  data() {
+    var validatePass = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入密码'))
+      } else if (value.length < 6) {
+        callback(new Error('密码长度最短6位'))
+      } else {
+        if (this.ruleForm.checkPass !== '') {
+          this.$refs.ruleForm.validateField('checkPass')
+        }
+        callback()
+      }
+    }
+    var validatePass2 = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请再次输入密码'))
+      } else if (value !== this.ruleForm.password) {
+        callback(new Error('两次输入密码不一致!'))
+      } else {
+        callback()
+      }
+    }
+    return {
+      dialogAddVisible: false,
+      params: {
+        page: 1,
+        pageSize: 100,
+      },
+      list: null,
+      ruleForm: {
+        password: '',
+        checkPass: '',
+        account: '',
+        id: '',
+        roleIdList: []
+      },
+      rules: {
+        password: [
+          { validator: validatePass, trigger: 'blur' }
+        ],
+        checkPass: [
+          { validator: validatePass2, trigger: 'blur' }
+        ],
+      }
+    }
+  },
   methods: {
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
+    },
+    showDialog() {
+      this.dialogAddVisible = true
+      this.ruleForm.id = store.getters.id
+      this.ruleForm.account = store.getters.name
+      getAccountList(this.params).then(response => {
+        console.log(JSON.stringify(response))
+        this.list = response.data.listData
+        this.list.forEach(element => {
+          if (element.id === this.ruleForm.id) {
+            element.roleList.forEach(item => {
+              this.ruleForm.roleIdList.push(item.id)
+            })
+          }
+        })
+        console.log(JSON.stringify(this.ruleForm))
+      })
+    },
+    async changePassword(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.ruleForm.password = md5(this.ruleForm.password)
+          updateAccount(this.ruleForm).then(response => {
+            console.log(JSON.stringify(response))
+            if (response.success) {
+              alert('密码修改成功')
+              this.logout()
+            }
+          }).finally(
+            this.dialogAddVisible = false
+          )
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
     },
     async logout() {
       await this.$store.dispatch('user/logout')
